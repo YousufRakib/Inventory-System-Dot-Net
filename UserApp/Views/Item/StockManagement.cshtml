@@ -1,0 +1,657 @@
+﻿
+@{ ViewBag.Title = "Index - Stock Management";
+                Layout = "~/Views/shared/_LoggedInLayout.cshtml"; }
+
+@*@Html.Partial("_EditStock")*@
+<style>
+    div.jtable-main-container > table.jtable > thead th.jtable-column-header div.jtable-column-header-container {
+        height: 60px;
+        margin-left: 4px;
+    }
+</style>
+@Html.Partial("_EditStock")
+
+<div class="modal hide fade" id="modalUploadHistory" style="width: 60%;height:80%;margin-right: 20%;">
+    <div class="modal-body">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h3 id="itemNameUploadHistory"></h3>
+    </div>
+    <div class="modal-body">
+        <div style="width: 100%;height:100%">
+            <div id="itemUploadHistoryTable"></div>
+        </div>
+    </div>
+</div>
+
+<div class="filtering">
+    <form>
+        <div class="input-append">
+            <select id="filter">
+                <option value="ItemName">ItemName</option>
+                <option value="ItemCode">ItemCode</option>
+                <option value="LowStock">LowStock</option>
+                <option value="AvaliableStockGreater">Available Stock >=</option>
+                <option value="AvaliableStockLesser">Available Stock <=</option>
+                <option value="Supplier">Supplier</option>
+            </select>
+            <input style="margin-left:10px;" class="span4" id="filterText" type="text">
+            <button style="margin-left:10px;" class="btn" id="LoadRecordsButton" type="button">Search</button>
+            <button style="margin-left:10px;" class="btn" id="Refresh" type="button">Clear Search</button>
+            <a style="margin-left:10px;" class="btn" onclick=ExportToExcel()>Export</a>
+        </div>
+    </form>
+</div>
+
+
+<div id="tblItems"></div>
+
+<script>
+
+    $(document).ready(pageLoad);
+
+    var returnObj = null;
+
+    function pageLoad() {
+        loadItems()
+        SetupItemHistory()
+        SetupUploadHistory()
+    }
+
+    function isDisabledAuto() {
+        var source = $("#filter").val()
+
+        return !(source == 'ItemName' || source == 'Supplier')
+    }
+
+    $("#filter").change(function () {
+        $("#filterText").autocomplete({
+            disabled: isDisabledAuto()
+        })
+    });
+
+    $("#filterText").autocomplete({
+        disabled: false,
+        source: function (request, response) {
+            var source = $("#filter").val()
+            var url=''
+
+            if (source == 'ItemName') {
+                url = '@Url.Action("LookupItem")'
+            }
+            else if (source == 'Supplier') {
+                url = '@Url.Action("LookupSupplier")'
+            }
+            $.get(url, {
+                searchText: request.term,
+                onlyItemName:true
+            }, function (data) {
+                response(data);
+            });
+        },
+        minLength: 1,
+        change: function (event, ui) {
+
+        },
+        select: function (event, ui) {
+
+        }
+    });
+
+    $('#Refresh').click(function (e) {
+        e.preventDefault();
+        $('#tblItems').jtable('load')
+        $('#filterText').val('')
+    });
+
+    $('#LoadRecordsButton').click(function (e) {
+        e.preventDefault();
+        $('#tblItems').jtable('load', {
+            filter: $('#filter').val(),
+            filterText: $('#filterText').val()
+        });
+    });
+
+    function loadItems() {
+        $('#tblItems').jtable({
+            title: 'Item Master - Stock Management',
+            useBootstrap: true,
+            paging: true,
+            sorting: true,
+            selecting: false,
+            multiselect: false,
+            selectingCheckboxes: true,
+            scrollable: true,
+            actions: {
+                listAction: '@Url.Action("GetItemsWithStock")',
+            },
+            recordsLoaded: function (event, data) {
+                //console.log(data)
+            },
+            toolbar: {
+                @*items: [
+                    {
+                        icon: '../../Content/images/add_icon.png',
+                        text: '+Supplier Order',
+                        click: function() {
+                            $(location).attr("href", "@Url.Action("CreateOrder")")
+                        }
+                    }
+                ]*@
+            },
+            fields: {
+                ItemMasterID: {
+                    key: true,
+                    list: false
+                },
+                ItemName: {
+                    title: 'Item Name',
+                    width: '6%',
+                    edit: true,
+                    //Color:'#0000FF'
+                },
+                ItemCode: {
+                    title: 'Item Code',
+                    width: '7%',
+                    input: function (data) {
+                        if (data.record.ItemCode) {
+                            return String.format("<input type='text' readonly class='jtable-input-readonly' name='ItemCode' value={0}></input>", data.record.ItemCode);
+                        } else {
+                            //nothing to worry about here for your situation, data.value is undefined so the else is for the create/add new record user interaction, create is false for your usage so this else is not needed but shown just so you know when it would be entered
+                        }
+                    },
+                },
+                //SupplierName: {
+                //    title: 'Supplier Name',
+                //    width: '10%',
+                //    edit: true,
+                //},
+                CostUk: {
+                    title: 'Cost-UK(£)',
+                    edit: false,
+                    width: '5%',
+                    listClass: 'stockin'
+                },
+                UkWhStock: {
+                    title: 'UK-W.H_Stock',
+                    width: '5%',
+                    listClass: 'stockin'
+                },
+                UKFBAStock: {
+                    title: 'ARSUK-UK FBA Stock',
+                    width: '5%',
+                    listClass: 'stockin'
+                    /*listClass: 'stockout'*/
+                },
+                NEEZUKFBAStock: {
+                    title: 'NEEZ-UK FBA Stock',
+                    width: '5%',
+                    listClass: 'stockin'
+                    /*listClass: 'stockout'*/
+                },
+                UKTotalStock: {
+                    title: 'Total Stock',
+                    width: '5%',
+                    listClass: 'stockin'
+                    //listClass :'currentstock'
+                },
+                //UKStockLife: {
+                //    title: 'Stock Life Days',
+                //    width: '5%',
+                //    listClass: 'stockin'
+                //    //listClass: 'stocklevel'
+                //},
+                //UKReOrderQTY: {
+                //    title: 'Re-Order QTY',
+                //    edit: false,
+                //    width: '5%'
+                //},
+
+                CostEU: {
+                    title: 'Cost-EURO',
+                    edit: false,
+                    width: '5%',
+                    listClass: 'stockout'
+                },
+                EUWhStock: {
+                    title: 'EU-W.H Stock',
+                    width: '5%',
+                    listClass: 'stockout'
+                    /*listClass: 'stockin'*/
+                },
+                EUFBAStock: {
+                    title: 'ARSUK-EU-FBA Stock',
+                    width: '5%',
+                    listClass: 'stockout'
+                   /* listClass: 'stockout'*/
+                },
+                NEEZEUFBAStock: {
+                    title: 'NEEZ-EU-FBA Stock',
+                    width: '5%',
+                    listClass: 'stockout'
+                    /*listClass: 'stockout'*/
+                },
+                CDisFBCStock: {
+                    title: 'CDIS FBC Stock',
+                    width: '5%',
+                    listClass: 'stockout'
+                    /*listClass :'currentstock'*/
+                },
+                EUTotalStock: {
+                    title: 'Total Stock',
+                    width: '5%',
+                    listClass: 'stockout'
+                    /*listClass: 'stocklevel'*/
+                },
+                //EUStockLevel: {
+                //    title: 'Stock Level',
+                //    edit: false,
+                //    width: '5%',
+                //    listClass: 'stockout'
+                //},
+                //EUStockLife: {
+                //    title: 'Stock Life Days',
+                //    width: '5%',
+                //    listClass: 'stockout'
+                //    /*listClass: 'stocklevel'*/
+                //},
+
+
+                CostUSA: {
+                    title: 'Cost-USA',
+                    edit: false,
+                    width: '5%',
+                    listClass: 'currentstock'
+                },
+                USAWhStock: {
+                    title: 'USA-W.H_Stock',
+                    width: '5%',
+                    listClass: 'currentstock'
+                },
+                USAFBAStock: {
+                    title: 'USA-FBA Stock',
+                    width: '5%',
+                    listClass: 'currentstock'
+                },
+                USATotalStock: {
+                    title: 'USA-TotalStock',
+                    width: '5%',
+                    listClass: 'currentstock'
+                },
+                //USAStockLevel: {
+                //    title: 'USA-Stock Level',
+                //    edit: false,
+                //    width: '5%'
+                //},
+                //USAStockLife: {
+                //    title: 'Stock Life Days',
+                //    width: '5%',
+                //    listClass: 'currentstock'
+                //    //listClass: 'stocklevel'
+                //},
+
+
+                CostCA: {
+                    title: 'Cost-CA',
+                    edit: false,
+                    width: '5%',
+                    listClass: 'stocklevel'
+                },
+                CAWhStock: {
+                    title: 'CA-W.H-Stock',
+                    width: '5%',
+                    listClass: 'stocklevel'
+                },
+                CAFBAStock: {
+                    title: 'CA-FBA Stock',
+                    width: '5%',
+                    listClass: 'stocklevel'
+                },
+                CATotalStock: {
+                    title: 'CA-TotalStock',
+                    width: '5%',
+                    listClass: 'stocklevel'
+                },
+                //CAStockLevel: {
+                //    title: 'CA-Stock Level',
+                //    edit: false,
+                //    width: '5%',
+                //    listClass: 'stocklevel'
+                //},
+                //CAStockLife: {
+                //    title: 'Stock Life Days',
+                //    width: '5%',
+                //    listClass: 'stocklevel'
+                //},
+
+
+                CostAU: {
+                    title: 'Cost-AU',
+                    edit: false,
+                    width: '5%'
+                },
+                AUWhStock: {
+                    title: 'AU-W.H_Stock',
+                    width: '5%',
+                    /*listClass: 'stockin'*/
+                },
+                AUFBAStock: {
+                    title: 'AU-FBA Stock',
+                    width: '5%',
+                    /*listClass: 'stockout'*/
+                },
+                AUTotalStock: {
+                    title: 'AU-TotalStock',
+                    width: '5%',
+                   /* listClass: 'currentstock'*/
+                },
+                //AUStockLevel: {
+                //    title: 'AU-Stock Level',
+                //    edit: false,
+                //    width: '5%'
+                //},
+                //AUStockLife: {
+                //    title: 'Stock Life Days',
+                //    width: '5%',
+                //    /*listClass: 'stocklevel'*/
+                //},
+
+
+                Edit: {
+                    display: function (data) {
+                        var data = String.format("<a class='btn btn-success btn-mini' onclick='edit({0},{1},{2},{3})'>Add</a>",
+                              data.record.ItemMasterID
+                            , '"' + data.record.ItemName + '"'
+                            , '"' + data.record.ItemCode + '"'
+                            , data.record.CurrentStock);
+
+                        return data
+                    },
+                    edit: false,
+                    width: '2%'
+                },
+                History: {
+                    display: function (data) {
+                        var data = String.format("<a class='btn btn-success btn-mini' onclick='showHistory({0},{1})'>History</a>",
+                              data.record.ItemMasterID
+                             , '"' + data.record.ItemName + '"');
+
+                        return data
+                    },
+                    edit: false,
+                    width: '2%',
+                    //styleMedia: function () {
+                    //    'background-color': 'red';
+                    //}
+                },
+                UploadHistory: {
+                    display: function (data) {
+                        var data = String.format("<a class='btn btn-success btn-mini' onclick='showUploadHistory({0},{1})'>Upload History</a>",
+                            data.record.ItemMasterID
+                            , '"' + data.record.ItemName + '"');
+
+                        return data
+                    },
+                    edit: false,
+                    width: '2%',
+                    //styleMedia: function () {
+                    //    'background-color': 'red';
+                    //}
+                }
+            },
+            //rowInserted: function (event, data) {
+
+            //    $(this).find(".jtable tbody tr:eq(1)").css("background", "#F5ECCE");
+            //            // changing first row background color
+
+            //}
+
+        });
+
+        //$('#tblItems th:eq(2)').css({ background: "green" });
+        //$('#tblItems th:eq(4)').css({ background: "pink" });
+        //$('#tblItems th:eq(6)').css({ background: "blue" });
+        //$("#tblItems tr:nth-child(2)").css("background-color", "lightgreen");
+        $('#tblItems').jtable('load');
+        //$('#tblItems tr td:nth-child(2)').css('background-color', 'red');
+
+
+    }
+
+    function ExportToExcel() {
+        $.ajax({
+          url: '@Url.Action("CheckUser")',
+          type: 'POST',
+          success: function (result) {
+              if (result.Result=="OK")
+              {
+                  $(location).attr("href", "@Url.Action("ExportToExcel/")" + '?filter=' + $('#filter').val() + '&filterText=' + $('#filterText').val())
+              }
+              else
+              {
+                  alert('Only admin can export this!!');
+              }
+          }
+       });
+    }
+
+
+    @*function ExportToExcelWithValidUser() {
+        $(location).attr("href", "@Url.Action("ExportToExcel/")" + '?filter=' + $('#filter').val() + '&filterText=' + $('#filterText').val())
+    }*@
+
+
+    function SetupItemHistory() {
+        $('#itemHistoryTable').jtable({
+            title: 'Item History',
+            useBootstrap: true,
+            paging: true,
+            pageSizes :[6,12,18,24,30,500],
+            pageList: 'minimal',
+            actions: {
+                listAction: '@Url.Action("GetStockHistory")'
+            },
+            fields: {
+                FBARootName: {
+                    title: 'Wear House Name',
+                    width: '5%',
+                    listClass: 'align-center'
+                },
+                StockIn: {
+                    title: 'Stock In',
+                    width: '5%',
+                    listClass: 'align-center',
+                    display: function (data) {
+                        if (data.record.StockIn > 0) {
+                            return String.format("<b style=\"color:green\">{0}</b>", data.record.StockIn)
+                        }
+                        else {
+                            return String.format("")
+                        }
+                    },
+                },
+                StockOut: {
+                    title: 'Stock Out',
+                    display: function (data) {
+                        if (data.record.StockOut > 0) {
+                            return String.format("<b style=\"color:red\">{0}</b>", data.record.StockOut)
+                        }
+                        else {
+                            return String.format("")
+                        }
+                    },
+                    width: '10%',
+                    listClass: 'align-center'
+                },
+                FNSKU: {
+                    title: 'FNSKU',
+                    width: '20%',
+                    listClass: 'source-class'
+                },
+                SupplierName: {
+                    title: 'SupplierName',
+                    width: '20%',
+                    listClass: 'source-class'
+                },
+                Source: {
+                    title: 'Out Source',
+                    width: '20%',
+                    listClass: 'source-class'
+                },
+                CreatedDateString: {
+                    title: 'CREATE DATE',
+                    width: '15%',
+                    displayFormat: 'yy-mm-dd'
+                },
+                //EUStockIn: {
+                //    title: 'EU-WH ',
+                //    width: '5%',
+                //    listClass: 'align-center',
+                //    display: function (data) {
+                //        if (data.record.StockIn > 0) {
+                //            return String.format("<b style=\"color:green\">{0}</b>", data.record.StockIn)
+                //        }
+                //        else {
+                //            return String.format("")
+                //        }
+                //    },
+                //},
+                //EUStockOut: {
+                //    title: 'EU-FBA-STOCK',
+                //    display: function (data) {
+                //        if (data.record.StockOut > 0) {
+                //            return String.format("<b style=\"color:red\">{0}</b>", data.record.StockOut)
+                //        }
+                //        else {
+                //            return String.format("")
+                //        }
+                //    },
+                //    width: '10%',
+                //    listClass: 'align-center'
+                //}
+
+            },
+            toolbar: {
+
+            }
+        });
+    }
+
+    function SetupUploadHistory() {
+        $('#itemUploadHistoryTable').jtable({
+            title: 'FBA Stock Upload History',
+            useBootstrap: true,
+            paging: true,
+            pageSizes :[6,12,18,24,30,500],
+            pageList: 'minimal',
+            actions: {
+                listAction: '@Url.Action("GetFDBStockUploadHistory")'
+            },
+            fields: {
+                FBASellerName: {
+                    title: 'Seller Name',
+                    width: '5%',
+                    listClass: 'align-center'
+                },
+                FBARootName: {
+                    title: 'Wear House Name',
+                    width: '5%',
+                    listClass: 'align-center'
+                },
+                FNSKU: {
+                    title: 'FNSKU',
+                    width: '20%',
+                    listClass: 'source-class'
+                },
+                CreatedDateString: {
+                    title: 'CREATED DATE',
+                    width: '15%',
+                    displayFormat: 'yy-mm-dd'
+                },
+                UpdatedDateString: {
+                    title: 'UPDATED DATE',
+                    width: '15%',
+                    displayFormat: 'yy-mm-dd'
+                }
+            },
+            toolbar: {
+
+            }
+        });
+    }
+
+
+    function LoadStockNumber() {
+        var stock = {};
+        stock.ItemMasterId = $("#ItemMasterId").val();
+        stock.FBARootID = $("#FBARootID").val();
+        stock.ItemCode = $("#ItemCode").val();
+        if (stock.FBARootID != null) {
+        //    console.log(stock.FBARootID);
+        //console.log(stock);
+        //stock.studentAddress = $("#StudentAddress").val();
+            $.ajax({
+                type: "POST",
+                url: '@Url.Action("getStockNumber")',
+                data: '{searchClass: ' + JSON.stringify(stock) + '}',
+                dataType: "json",
+                contentType: "application/json; charset=utf-8",
+                success: function (data) {
+                    var stock = data.data;
+                    $("#CurrentStock").val(stock.StockQuantity);
+                    $("#Cost").val(stock.ItemCost);
+                    jQuery("#tblItems").trigger("reloadGrid");
+                },
+                error: function () {
+                    alert("Error while inserting data");
+                }
+            });
+        }
+    }
+
+    function showHistory(ItemMasterId,ItemName) {
+        $('#itemNameHistory').text(ItemName)
+        $('#itemHistoryTable').jtable('load', { id: ItemMasterId });
+        $('#modalStockHistory').modal('show');
+    }
+
+    function showUploadHistory(ItemMasterId, ItemName) {
+        $('#itemNameUploadHistory').text(ItemName)
+        $('#itemUploadHistoryTable').jtable('load', { id: ItemMasterId });
+        $('#modalUploadHistory').modal('show');
+    }
+
+    function clearModalInfo() {
+        $("#BatchNo").val("");
+        $("#CurrentStock").val("");
+        $("#Brand").val("");
+        $("#FnSku").val("");
+        $("#quantity").val("");
+        $("#Cost").val("");
+        $("#Currency").val("");
+    }
+
+    function edit(ItemMasterId, ItemName, ItemCode, StockUnits) {
+        clearForm()
+        $('#ItemMasterId').val(ItemMasterId)
+        $('#ItemNameText').val(ItemName)
+        $('#ItemCode').val(ItemCode)
+        $('#CurrentStock').val(StockUnits)
+        $('#FBARootID').val(FBARootID)
+        $('#modalStockAdd').modal('show');
+    }
+
+    function clearForm() {
+        $('#ItemMasterId').val(0)
+        $('#ItemNameText').val('')
+        $('#ItemCode').val('')
+        $('#InSource').val('');
+        $('.combobox').val('');
+        $('#OutSource').val('');
+        $('#quantity').val('');
+        $('#notes').val('');
+        $('#CurrentStock').val('')
+
+
+    }
+
+</script>

@@ -1,0 +1,142 @@
+﻿
+@model Infrastrucutre.Core.Models.ItemMaster
+
+@{
+    ViewBag.Title = "Asin Report";
+    Layout = "~/Views/shared/_LoggedInLayout.cshtml";
+}
+
+@using AkraTechFramework.Helpers
+
+
+<div>
+</div>
+<div class="row-fluid">
+    <div class="span12 control-group">
+        <h1 style="text-align:center;color: green;">Asin Report</h1>
+    </div>
+</div>
+<hr />
+<br />
+<h3 style="color:green;">@ViewBag.ItemName</h3>
+<div id="tblItem" style="width:auto"></div>
+
+<div id="divLoading" style="display:none"></div>
+
+
+
+<script>
+    $(document).ready(pageLoad);
+
+
+    function pageLoad() {
+        loadItems();
+        FindOrders();
+    }
+
+    function FindOrders() {
+
+        $('#tblItem').jtable('load', { startDate: '@ViewBag.startDate', endDate: '@ViewBag.endDate', Asin: '', ItemMasterID: '@ViewBag.ItemMasterID' });
+
+    }
+
+    function loadItems() {
+        $('#tblItem').jtable({
+            title: 'Report By Asin',
+            useBootstrap: true,
+            sorting: true,
+            selectingCheckboxes: true,
+            actions: {
+                listAction: '@Url.Action("Get_AsinReport")' + '?startDate=' + '@ViewBag.startDate' + '&endDate=' + '@ViewBag.endDate' + '&ItemMasterID=' + '@ViewBag.ItemMasterID'  //Get Asin Report Procedure
+
+            },
+            recordsLoaded: function (event, data) {
+
+                var recordsFound = String.format("Asin Report ({0} Records) [{1} To {2}]", data.records.length, '@ViewBag.startDate', '@ViewBag.endDate')
+                $('#tblItem').find('.jtable-title-text').html(recordsFound);
+
+            },
+            fields:
+            {
+                AsinNo: {
+                    title: 'ASIN NO',
+                    width: '0.5%'
+                },
+                Seller: {
+                    title: 'SELLER',
+                    width: '0.3%'
+                },
+                GB: {
+                    title: 'UK',
+                    width: '0.3%'
+                },
+                DE: {
+                    title: 'DE',
+                    width: '0.3%'
+                },
+                FR: {
+                    title: 'FR',
+                    width: '0.3%'
+                },
+                IT: {
+                    title: 'IT',
+                    width: '0.3%'
+                },
+                ES: {
+                    title: 'ES',
+                    width: '0.3%'
+                },
+                NL: {
+                    title: 'NL',
+                    width: '0.3%'
+                },
+                SE: {
+                    title: 'SE',
+                    width: '0.3%'
+                },
+                PL: {
+                    title: 'PL',
+                    width: '0.3%'
+                },
+                TR: {
+                    title: 'TR',
+                    width: '0.3%'
+                },
+                USA: {
+                    title: 'US',
+                    width: '0.3%'
+                },
+                CA: {
+                    title: 'CA',
+                    width: '0.3%'
+                },
+                AU: {
+                    title: 'AU',
+                    width: '0.3%'
+                },
+                Smays_Sales: {
+                    title: 'Smays_Sales',
+                    width: '0.07%',
+                    listClass: 'stocklevel'
+                },
+                Salsabil: {
+                    title: 'Salsabil',
+                    width: '0.07%',
+                    listClass: 'stocklevel'
+                },
+                CDisc: {
+                    title: 'C-DISC',
+                    width: '0.2%'
+                },
+                TotalSold:
+                {
+                    title: 'TOTAL-SOLD',
+                    width: '0.3%'
+                }
+            }
+        });
+    }
+</script>
+
+
+

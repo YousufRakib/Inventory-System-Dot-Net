@@ -1,0 +1,487 @@
+﻿@{
+    ViewBag.Title = "SupplierOrderSelection";
+    Layout = "~/Views/shared/_LoggedInLayout.cshtml";
+}
+
+@using AkraTechFramework.Helpers
+
+<div class="row-fluid">
+    <div class="span12 control-group">
+        <h2 style="text-align:center;color: green;">Supplier Order Selection</h2>
+    </div>
+</div>
+
+<div class="row-fluid" style="margin-left:2%;">
+    <input id="userName" type="hidden" value="@ViewBag.UserName" />
+    <form>
+        <div class="span2 control-group" style="margin-left: 0.5%; margin-right: 0%">
+            <label class="control-label">W.Root</label>
+            <div class="span12 control-group" style="margin-left: 0%;">
+                <select class="control-label chosen" , Style="width:100%" data-val="true" id="FBARootID" name="FBARootID">
+                    @foreach (var item in (ViewBag.FBARoot as System.Web.Mvc.SelectList).Items as List<Infrastrucutre.Core.Models.FBALocations>)
+                    {
+                        if (ViewBag.FBARoot.SelectedValue == item.FBARootID)
+                        {
+                            <option value="@item.FBARootID" selected="selected">@item.FBARoot</option>
+                        }
+                        else
+                        {
+                            <option value="@item.FBARootID">@item.FBARoot</option>
+                        }
+                    }
+                </select>
+            </div>
+        </div>
+
+        <div class="span2 control-group" style="margin-left:0.5%">
+            <label class="control-label">Select Supplier</label>
+            <select class="control-label chosen" , style="width:118%;" data-val="true" id="SupplierName" name="SupplierName">
+                @foreach (var item in (ViewBag.Suppliers as System.Web.Mvc.SelectList).Items as List<Infrastrucutre.Core.Models.Models.ForecastingItemSummary>)
+                {
+                    <option value="@item.SupplierName ">@item.SupplierName</option>
+                }
+            </select>
+        </div>
+
+        <button style="margin-left:3%; margin-top:1.3%;width:5%;" class="btn" id="LoadRecordsButton" type="button">Search</button>
+    </form>
+
+</div>
+
+<div id="tblItemForecastingView"></div>
+
+<br />
+<hr />
+<hr />
+<br />
+
+<div class="row-fluid" style="margin-left:2%;width:96.5%">
+    <div class="span2 control-group">
+        <button style="margin-left: 0%; width: 100%; margin-top: 0%; margin-bottom:5%; font-weight: bold;" class="btn" id="proceedForecasting" onclick="proceedForecasting()" type="button">Proceed</button>
+    </div>
+
+    <div class="span2 control-group" style="margin-left: 2.5%; margin-top: -1.5%;">
+        @Html.Label("supplierOrderId", "Supplier OrderId", new { @class = "control-label", @style = "margin-top: 0%;" })
+        @Html.TextBox("supplierOrderId", "", new { @class = "span12", @Value = @ViewBag.SupplierOrderId, @readonly = "readonly", @style = "width:101%" })
+    </div>
+</div>
+
+<div class="row-fluid" style="margin-left:2%;width:97%">
+    <div class="span2 control-group">
+        @Html.Label("supplierName", "Supplier Name", new { @class = "control-label", })
+        @Html.TextBox("supplierName", "", new { @class = "span12", @style = "width:100%", @readonly = "readonly" })
+    </div>
+    <div class="span2 control-group">
+        @Html.Label("warehouseRoot", "Warehouse Root", new { @class = "control-label", })
+        @Html.TextBox("warehouseRoot", "", new { @class = "span12", @style = "width:100%", @readonly = "readonly" })
+    </div>
+    <div class="span2 control-group">
+        @Html.Label("shipmentTitle", "Shipment Title", new { @class = "control-label", @style = "margin-top: 0%;" })
+        @Html.TextBox("shipmentTitle", "", new { @class = "span12", @style = "width:100%" })
+    </div>
+    <div class="span2 control-group">
+        @Html.Label("totalQty", "Total Qty", new { @class = "control-label", @style = "margin-top: 0%;" })
+        @Html.TextBox("totalQty", "", new { @class = "span12", @style = "width:100%", @readonly = "readonly", @type = "number", @Value = "0", @min = 0 })
+    </div>
+    <div class="span2 control-group">
+        @Html.Label("totalBox", "Total Carton/Box", new { @class = "control-label", @style = "margin-top: 0%;" })
+        @Html.TextBox("totalBox", "", new { @class = "span12", @style = "width:100%", @readonly = "readonly", @Value = "0" })
+    </div>
+    <div class="span2 control-group">
+        @Html.Label("totalValue", "Total Value", new { @class = "control-label", @style = "margin-top: 0%;" })
+        @Html.TextBox("totalValue", "", new { @class = "span12", @style = "width:100%", @readonly = "readonly", @Value = "0" })
+    </div>
+</div>
+
+<div class="row-fluid" style="margin-left:2%;width:97%">
+    <div class="span2 control-group">
+        @Html.Label("totalVolume", "Total Volume (CBM)", new { @class = "control-label", @style = "margin-top: 0%;" })
+        @Html.TextBox("totalVolume", "", new { @class = "span12", @style = "width:100%", @Value = "0" , @readonly = "readonly" })
+    </div>
+    <div class="span2 control-group">
+        @Html.Label("depositPercentage", "Deposit Percentage", new { @class = "control-label", @style = "margin-top: 0%;" })
+        @Html.TextBox("depositPercentage", "", new { @class = "span12", @style = "width:100%"})
+    </div>
+    <div class="span2 control-group">
+        @Html.Label("depositAmount", "Deposit Amount", new { @class = "control-label", @style = "margin-top: 0%;" })
+        @Html.TextBox("depositAmount", "", new { @class = "span12", @style = "width:100%", @Value = "0", @min = 0 })
+    </div>
+    <div class="span2 control-group">
+        @Html.Label("currency", "Currency", new { @class = "control-label", @style = "margin-top: 0%;" })
+        @Html.TextBox("currency", "", new { @class = "span12", @style = "width:100%", @readonly = "readonly" })
+    </div>
+    <div class="span2 control-group">
+        @Html.Label("gbpRate", "GBP Rate", new { @class = "control-label", @style = "margin-top: 0%;" })
+        @Html.TextBox("gbpRate", "", new { @class = "span12", @style = "width:100%", @Value = "0", @min = 0 })
+    </div>
+    <div class="span2 control-group">
+        @Html.Label("source", "Source", new { @class = "control-label", })
+        @Html.TextBox("source", "", new { @class = "span12", @style = "width:100%" })
+    </div>
+</div>
+
+<div class="row-fluid" style="margin-left:2%;width:97%">
+    <div class="span2 control-group">
+        <label class="control-label">ETD Date</label>
+        @Html.TextBox("etdDate", DateTime.Now.ToShortDateString(), new
+        {
+            @class = "span12 datepicker",
+            @readonly = "readonly",
+            @style = "cursor:pointer; background-color:white;width:100%",
+            @placeholder = "Select Date"
+        })
+    </div>
+    <div class="span2 control-group">
+        <label class="control-label">Deposit Date</label>
+        @Html.TextBox("depositDate", DateTime.Now.ToShortDateString(), new
+        {
+            @class = "span12 datepicker",
+            @readonly = "readonly",
+            @style = "cursor:pointer; background-color:white;width:100%",
+            @placeholder = "Select Date"
+        })
+    </div>
+    <div class="span2 control-group">
+        <label class="control-label">Cut Off Date</label>
+        @Html.TextBox("cutOffDate", DateTime.Now.ToShortDateString(), new
+        {
+            @class = "span12 datepicker",
+            @readonly = "readonly",
+            @style = "cursor:pointer; background-color:white;width:100%",
+            @placeholder = "Select Date"
+        })
+    </div>
+    <div class="span2 control-group">
+        @Html.Label("portOfLoading", "Port of Loading", new { @class = "control-label", })
+        @Html.TextBox("portOfLoading", "", new { @class = "span12", @style = "width:100%", @readonly = "readonly" })
+    </div>
+    <div class="span2 control-group">
+        @Html.Label("portOfArrival", "Port of Arrival", new { @class = "control-label", })
+        @Html.TextBox("portOfArrival", "", new { @class = "span12", @style = "width:100%" })
+    </div>
+    <div class="span2 control-group">
+        @Html.Label("leadTime", "LeadTime", new { @class = "control-label", @style = "margin-top: 0%;" })
+        @Html.TextBox("leadTime", "", new { @class = "span12", @style = "width:100%", @Value = "0", @readonly = "readonly" })
+    </div>
+</div>
+
+<div class="row-fluid" style="margin-left:2%;width:97%">
+    <div class="span2 control-group">
+        <button style="margin-left: 0%; width: 100%; margin-top: 9%; margin-bottom:5%; font-weight: bold;" class="btn" id="submit" onclick="SaveData()" type="button">Submit</button>
+    </div>
+</div>
+
+<script>
+
+    $(document).ready(pageLoad);
+
+    function pageLoad() {
+        //$("#SupplierName").empty();
+        //$("#FBARootID").empty();
+
+        loadItemForecasting()
+
+        $(".datepicker").datepicker();
+        $(".datepicker").datepicker("option", "dateFormat", "d M, y");
+    }
+
+    const months = [
+        'Jan',
+        'Feb',
+        'Mar',
+        'Apr',
+        'May',
+        'Jun',
+        'Jul',
+        'Aug',
+        'Sep',
+        'Oct',
+        'Nov',
+        'Dec'
+    ]
+
+    $('#LoadRecordsButton').click(function (e) {
+        e.preventDefault();
+        $('#tblItemForecastingView').jtable('load', {
+            warehouseRoot: $('#FBARootID').val(),
+            supplierName: $('#SupplierName').val()
+        });
+    });
+
+    function proceedForecasting() {
+        $("#totalQty").val(0);
+        $("#totalBox").val(0);
+        $("#totalValue").val(0);
+        $("#totalVolume").val(0);
+        $("#leadTime").val(0);
+        $("#currency").val('');
+        $("#portOfLoading").val('');
+        $("#supplierName").val('');
+        $("#warehouseRoot").val('');
+
+        var totalQty = 0;
+        var totalBox = 0;
+        var totalValue = 0;
+        var totalVolume = 0;
+        var leadTime = 0;
+        var portOfLoading = "";
+        var supplierCurrency = "";
+        var supplierName = "";
+        var warehouseRoot = "";
+
+        var isSameSupplierCurrency = 0;
+        var isSameSupplierName = 0;
+        var isSamePortOfLoading = 0;
+        var isSameWarehouseRoot = 0;
+        var isSameLeadTime = 0;
+        var count = 0;
+        var isProceed = 1;
+
+        var $selectedRows = $('#tblItemForecastingView').jtable('selectedRows');
+        if ($selectedRows.length > 0)
+        {
+            $selectedRows.each(function (row, tr) {
+                count = count + 1;
+                var record = $(this).data('record');
+                //debugger;
+                if (count > 1) {
+                    if (supplierName.toUpperCase() == record.SupplierName.toUpperCase() && warehouseRoot.toUpperCase() == record.WarehouseRoot.toUpperCase()) {
+                        totalQty += record.TotalQty;
+                        totalBox += record.TotalBox;
+                        totalValue += record.TotalValue;
+                        totalVolume += record.TotalCVM;
+                        leadTime = record.LeadTime;
+                        portOfLoading = record.PortOfLoading;
+                        supplierCurrency = record.SupplierCurrency;
+                        supplierName = record.SupplierName;
+                        warehouseRoot = record.WarehouseRoot;
+                    }
+                    else {
+                        isProceed = 0;
+                        return false;
+                    }
+                }
+                else {
+                    totalQty += record.TotalQty;
+                    totalBox += record.TotalBox;
+                    totalValue += record.TotalValue;
+                    totalVolume += record.TotalCVM;
+                    leadTime = record.LeadTime;
+                    portOfLoading = record.PortOfLoading;
+                    supplierCurrency = record.SupplierCurrency;
+                    supplierName = record.SupplierName;
+                    warehouseRoot = record.WarehouseRoot;
+                }
+            });
+        }
+        else {
+            alert('You have to select atlist 1 row from the list!!');
+        }
+
+        if (isProceed == 0) {
+            alert('Kindly make sure WarehouseRoot,SupplierName,SupplierCurrency,PortOfLoading & LeadTime are same in your selected list!!');
+        }
+        else {
+            $("#totalQty").val(totalQty);
+            $("#totalBox").val(totalBox);
+            $("#totalValue").val(totalValue);
+            $("#totalVolume").val(totalVolume);
+            $("#leadTime").val(leadTime);
+            $("#currency").val(supplierCurrency);
+            $("#portOfLoading").val(portOfLoading);
+            $("#supplierName").val(supplierName);
+            $("#warehouseRoot").val(warehouseRoot);
+        }
+    }
+
+    function loadItemForecasting() {
+        $('#tblItemForecastingView').jtable({
+            title: 'Item Forecasting List',
+            useBootstrap: true,
+            paging: true,
+            sorting: true,
+            selecting: true,
+            multiselect: true,
+            selectingCheckboxes: true,
+
+            scrollable: true,
+            actions: {
+                listAction: '@Url.Action("GetsItemForecastingSummaryListForSupplierOrder")',
+            },
+
+            recordsLoaded: function (event, data) {
+            },
+            toolbar: {
+            },
+
+            fields: {
+                Id: {
+                    key: true,
+                    list: false
+                },
+                ItemMasterId: {
+                    key: true,
+                    list: false
+                },
+                OrderId: {
+                    title: 'Order Id',
+                    width: '4%'
+                },
+                ItemName: {
+                    title: 'Item Name',
+                    width: '8%'
+                },
+                SupplierCurrency: {
+                    title: 'Supplier Currency',
+                    width: '8%',
+                    hidden: true
+                },
+                ItemCode: {
+                    title: 'Item Code',
+                    width: '5%'
+                },
+                SupplierName: {
+                    title: 'Supplier Name',
+                    width: '7%'
+                },
+                TotalQty: {
+                    title: 'Total Qty',
+                    width: '4%'
+                },
+                TotalBox: {
+                    title: 'Total Box',
+                    width: '4%'
+                },
+                TotalValue: {
+                    title: 'Total Value',
+                    width: '5%'
+                },
+                TotalCVM: {
+                    title: 'Total CBM',
+                    width: '4%'
+                },
+                OrderDateString: {
+                    title: 'Order Created Date',
+                    width: '8%'
+                },
+                PortOfLoading: {
+                    title: 'Port of Loading',
+                    width: '6%'
+                },
+                BatchNo: {
+                    title: 'Batch No',
+                    width: '5%'
+                },
+                WarehouseRoot: {
+                    title: 'Warehouse Root',
+                    width: '5%'
+                },
+                LeadTime: {
+                    title: 'LeadTime',
+                    width: '5%'
+                }
+            },
+        });
+        $('#tblItemForecastingView').jtable('load');
+    }
+
+    function SaveData() {
+
+        const etdDate = `${new Date($('#etdDate').val()).getDate()} ${months[new Date($('#etdDate').val()).getMonth()]}, ${new Date($('#etdDate').val()).getFullYear()}`;
+        const depositDate = `${new Date($('#depositDate').val()).getDate()} ${months[new Date($('#depositDate').val()).getMonth()]}, ${new Date($('#depositDate').val()).getFullYear()}`;
+        const cutOffDate = `${new Date($('#cutOffDate').val()).getDate()} ${months[new Date($('#cutOffDate').val()).getMonth()]}, ${new Date($('#cutOffDate').val()).getFullYear()}`;
+
+        var supplierOrderSelectionList = [];
+       
+        var supplierOrderSelectionSummary = {
+            SupplierOrderId: $('#supplierOrderId').val(),
+            SupplierName: $('#supplierName').val(),
+            WarehouseRoot: $('#warehouseRoot').val(),
+            ShipmentTitle: $('#shipmentTitle').val(),
+            TotalQty: $('#totalQty').val(),
+            TotalBox: $('#totalBox').val(),
+            TotalValue: $('#totalValue').val(),
+            TotalCVM: $('#totalVolume').val(),
+            DepositPercentage: $('#depositPercentage').val(),
+            DepositAmount: $('#depositAmount').val(),
+            Currency: $('#currency').val(),
+            GBPRate: $('#gbpRate').val(),
+            Source: $('#source').val(),
+            ETDDate: etdDate,
+            DepositDate: depositDate,
+            CutOffDate: cutOffDate,
+            PortOfLoading: $('#portOfLoading').val(),
+            PortOfArrival: $("#portOfArrival").val(),
+            LeadTime: $("#leadTime").val(),
+            IsActive: true,
+            CreatedBy: $('#userName').val(),
+            CreatedDate: new Date()
+        };
+
+        var $selectedRows = $('#tblItemForecastingView').jtable('selectedRows');
+        if ($selectedRows.length > 0) {
+            $selectedRows.each(function (row, tr) {
+                var record = $(this).data('record');
+                var supplierOrderSelection = {
+                    SupplierOrderId: $('#supplierOrderId').val(),
+                    ItemMasterID: record.ItemMasterId,
+                    OrderId: record.OrderId,
+                    ItemName: record.ItemName,
+                    ItemCode: record.ItemCode,
+                    SupplierName: record.SupplierName,
+                    TotalQty: record.TotalQty,
+                    TotalBox: record.TotalBox,
+                    TotalValue: record.TotalValue,
+                    TotalCVM: record.TotalCVM,
+                    OrderDateString: record.OrderDateString,
+                    PortOfLoading: record.PortOfLoading,
+                    BatchNo: record.BatchNo,
+                    WarehouseRoot: record.WarehouseRoot,
+                    LeadTime: record.LeadTime,
+                    IsActive: true,
+                    CreatedBy: $('#userName').val(),
+                    CreatedDate: new Date()
+                };
+                supplierOrderSelectionList.push(supplierOrderSelection);
+            });
+        }
+        else {
+            alert('You have to select atlist 1 row from the list!!');
+        }
+
+        var supplierOrderSelectionModel = {
+            SupplierOrderSummary: supplierOrderSelectionSummary,
+            SupplierOrders: supplierOrderSelectionList
+        };
+
+        var supplierOrderSelectionDataModel = JSON.stringify(supplierOrderSelectionModel);
+
+        var data = new FormData();
+
+        data.append("SupplierOrderSelectionDataModel", supplierOrderSelectionDataModel);
+
+        var actionurl = "@Url.Action("SaveSupplierOrder", "Forecasting")";
+
+        /*Loading(true);*/
+
+        $.ajax({
+            type: "POST",
+            url: actionurl,
+            data: data,
+            processData: false,
+            contentType: false,
+            async: false,
+            success: function (data) {
+                /*Loading(false);*/
+                if (data.output === "success") {
+                    alert("Data saved successfully!!");
+                    window.location.href = '/Forecasting/SupplierOrderList';
+                    return false;
+                } else {
+                    alert("Something went wrong!!");
+                    return false;
+                }
+            }
+        });
+    }
+</script>

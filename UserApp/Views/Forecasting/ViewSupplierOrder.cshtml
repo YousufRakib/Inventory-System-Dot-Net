@@ -1,0 +1,312 @@
+﻿@model Infrastrucutre.Core.Models.Models.SupplierOrderSummary
+@{
+    ViewBag.Title = "ViewSupplierOrder";
+    //Layout = "~/Views/shared/_LoggedInLayout.cshtml";
+    Layout = "~/Views/shared/_ForecastingLayout.cshtml";
+}
+
+@using AkraTechFramework.Helpers
+
+<div class="row-fluid">
+    <div class="span12 control-group">
+        <h2 style="text-align:center;color: green;">View Supplier Order</h2>
+    </div>
+</div>
+
+<div id="tblItemForecastingView"></div>
+
+<br />
+<hr />
+<hr />
+<br />
+
+<div class="row-fluid" style="margin-left:2%;width:96.5%">
+    <div class="span2 control-group" style="margin-left: 0%; margin-top: -1.5%;">
+        @Html.LabelFor(model => model.SupplierOrderId, "Supplier OrderId", new { @class = "control-label", @style = "margin-top: 0%;" })
+        @Html.TextBoxFor(model => model.SupplierOrderId, "", new { id = "supplierOrderId", @class = "span12", @readonly = "readonly", @style = "width:101%" })
+    </div>
+</div>
+
+<div class="row-fluid" style="margin-left:2%;width:97%">
+    <div class="span2 control-group">
+        @Html.LabelFor(model => model.SupplierName, "Supplier Name", new { @class = "control-label", @style = "margin-top: 0%;" })
+        @Html.TextBoxFor(model => model.SupplierName, "", new { id = "supplierName", @class = "span12", @readonly = "readonly", @style = "width:100%" })
+    </div>
+    <div class="span2 control-group">
+        @Html.LabelFor(model => model.WarehouseRoot, "Warehouse Root", new { @class = "control-label", @style = "margin-top: 0%;" })
+        @Html.TextBoxFor(model => model.WarehouseRoot, "", new { id = "warehouseRoot", @class = "span12", @readonly = "readonly", @style = "width:100%" })
+    </div>
+    <div class="span2 control-group">
+        @Html.LabelFor(model => model.ShipmentTitle, "Shipment Title", new { @class = "control-label", @style = "margin-top: 0%;" })
+        @Html.TextBoxFor(model => model.ShipmentTitle, "", new { id = "shipmentTitle", @class = "span12", @readonly = "readonly", @style = "width:100%" })
+    </div>
+    <div class="span2 control-group">
+        @Html.LabelFor(model => model.TotalQty, "Total Qty", new { @class = "control-label", @style = "margin-top: 0%;" })
+        @Html.TextBoxFor(model => model.TotalQty, "", new { id = "totalQty", @class = "span12", @readonly = "readonly", @style = "width:100%" })
+    </div>
+    <div class="span2 control-group">
+        @Html.LabelFor(model => model.TotalBox, "Total Carton/Box", new { @class = "control-label", @style = "margin-top: 0%;" })
+        @Html.TextBoxFor(model => model.TotalBox, "", new { id = "totalBox", @class = "span12", @readonly = "readonly", @style = "width:100%" })
+    </div>
+    <div class="span2 control-group">
+        @Html.LabelFor(model => model.TotalValue, "Total Value", new { @class = "control-label", @style = "margin-top: 0%;" })
+        @Html.TextBoxFor(model => model.TotalValue, "", new { id = "totalValue", @class = "span12", @readonly = "readonly", @style = "width:100%" })
+    </div>
+</div>
+
+<div class="row-fluid" style="margin-left:2%;width:97%">
+    <div class="span2 control-group">
+        @Html.LabelFor(model => model.TotalCVM, "Total Volume (CBM)", new { @class = "control-label", @style = "margin-top: 0%;" })
+        @Html.TextBoxFor(model => model.TotalCVM, "", new { id = "totalVolume", @class = "span12", @readonly = "readonly", @style = "width:100%" })
+    </div>
+    <div class="span2 control-group">
+        @Html.LabelFor(model => model.DepositPercentage, "Deposit Percentage", new { @class = "control-label", @style = "margin-top: 0%;" })
+        @Html.TextBoxFor(model => model.DepositPercentage, "", new { id = "depositPercentage", @class = "span12", @readonly = "readonly", @style = "width:100%" })
+    </div>
+    <div class="span2 control-group">
+        @Html.LabelFor(model => model.DepositAmount, "Deposit Amount", new { @class = "control-label", @style = "margin-top: 0%;" })
+        @Html.TextBoxFor(model => model.DepositAmount, "", new { id = "depositAmount", @class = "span12", @readonly = "readonly", @style = "width:100%" })
+    </div>
+    <div class="span2 control-group">
+        @Html.LabelFor(model => model.Currency, "Currency", new { @class = "control-label", @style = "margin-top: 0%;" })
+        @Html.TextBoxFor(model => model.Currency, "", new { id = "currency", @class = "span12", @readonly = "readonly", @style = "width:100%" })
+    </div>
+    <div class="span2 control-group">
+        @Html.LabelFor(model => model.GBPRate, "GBP Rate", new { @class = "control-label", @style = "margin-top: 0%;" })
+        @Html.TextBoxFor(model => model.GBPRate, "", new { id = "gbpRate", @class = "span12", @readonly = "readonly", @style = "width:100%" })
+    </div>
+    <div class="span2 control-group">
+        @Html.LabelFor(model => model.Source, "Source", new { @class = "control-label", @style = "margin-top: 0%;" })
+        @Html.TextBoxFor(model => model.Source, "", new { id = "source", @class = "span12", @readonly = "readonly", @style = "width:100%" })
+    </div>
+</div>
+
+<div class="row-fluid" style="margin-left:2%;width:97%">
+    <div class="span2 control-group">
+        <label class="control-label">ETD Date</label>
+        @Html.TextBoxFor(model => model.ETDDate, new
+        {
+            id = "etdDate",
+            @class = "span12 datepicker",
+            @readonly = "readonly",
+            @style = "cursor:pointer; background-color:white",
+            @placeholder = "Select Date"
+        })
+    </div>
+    <div class="span2 control-group">
+        <label class="control-label">Deposit Date</label>
+        @Html.TextBoxFor(model => model.DepositDate, new
+        {
+            id = "depositDate",
+            @class = "span12 datepicker",
+            @readonly = "readonly",
+            @style = "cursor:pointer; background-color:white",
+            @placeholder = "Select Date"
+        })
+    </div>
+    <div class="span2 control-group">
+        <label class="control-label">Cut Off Date</label>
+        @Html.TextBoxFor(model => model.CutOffDate, new
+        {
+            id = "cutOffDate",
+            @class = "span12 datepicker",
+            @readonly = "readonly",
+            @style = "cursor:pointer; background-color:white",
+            @placeholder = "Select Date"
+        })
+    </div>
+    <div class="span2 control-group">
+        @Html.LabelFor(model => model.PortOfLoading, "Port of Loading", new { @class = "control-label", @style = "margin-top: 0%;" })
+        @Html.TextBoxFor(model => model.PortOfLoading, "", new { id = "portOfLoading", @class = "span12", @readonly = "readonly", @style = "width:100%" })
+    </div>
+    <div class="span2 control-group">
+        @Html.LabelFor(model => model.PortOfArrival, "Port of Arrival", new { @class = "control-label", @style = "margin-top: 0%;" })
+        @Html.TextBoxFor(model => model.PortOfArrival, "", new { id = "portOfArrival", @class = "span12", @readonly = "readonly", @style = "width:100%" })
+    </div>
+    <div class="span2 control-group">
+        @Html.LabelFor(model => model.LeadTime, "LeadTime", new { @class = "control-label", @style = "margin-top: 0%;" })
+        @Html.TextBoxFor(model => model.LeadTime, "", new { id = "leadTime", @class = "span12", @readonly = "readonly", @style = "width:100%" })
+    </div>
+</div>
+
+<script>
+
+    $(document).ready(pageLoad);
+
+    function pageLoad() {
+        loadItemForecasting()
+
+        $(".datepicker").datepicker();
+        $(".datepicker").datepicker("option", "dateFormat", "d M, y");
+    }
+
+    const months = [
+        'Jan',
+        'Feb',
+        'Mar',
+        'Apr',
+        'May',
+        'Jun',
+        'Jul',
+        'Aug',
+        'Sep',
+        'Oct',
+        'Nov',
+        'Dec'
+    ]
+
+    function loadItemForecasting() {
+
+        var url = "@Url.Action("GetSupplierOrderListDataById", "Forecasting")?id=" + @ViewBag.Id;
+
+        $.ajax({
+            type: "GET",
+            url: url,
+            contentType: false,
+            processData: false,
+            success: function (response) {
+                if (response.output == 'success') {
+                    var gridDataSource = response.returnvalue;
+
+                    var grid = $("#tblItemForecastingView").data("kendoGrid");
+                    var dataS = grid.dataSource;
+                    var total = 0;
+                    $.each(gridDataSource, function (idx, row) {
+                        dataS.insert(total, row);
+                    });
+                }
+            }
+        });
+    }
+
+    $("#tblItemForecastingView").kendoGrid({
+        dataSource: {
+            schema: {
+                model: {
+                    fields: {
+                        Id: {
+                            key: true,
+                            list: false
+                        },
+                        SupplierOrderId: {
+                            title: 'SupplierOrder Id',
+                            width: '4%'
+                        },
+                        ItemName: {
+                            title: 'Item Name',
+                            width: '8%'
+                        },
+                        ItemCode: {
+                            title: 'Item Code',
+                            width: '5%'
+                        },
+                        SupplierName: {
+                            title: 'Supplier Name',
+                            width: '7%'
+                        },
+                        TotalQty: {
+                            title: 'Total Qty',
+                            width: '4%'
+                        },
+                        TotalBox: {
+                            title: 'Total Box',
+                            width: '4%'
+                        },
+                        TotalValue: {
+                            title: 'Total Value',
+                            width: '5%'
+                        },
+                        TotalCVM: {
+                            title: 'Total CBM',
+                            width: '4%'
+                        },
+                        OrderDateString: {
+                            title: 'Order Created Date',
+                            width: '8%'
+                        },
+                        PortOfLoading: {
+                            title: 'Port of Loading',
+                            width: '6%'
+                        },
+                        BatchNo: {
+                            title: 'Batch No',
+                            width: '5%'
+                        },
+                        WarehouseRoot: {
+                            title: 'Warehouse Root',
+                            width: '5%'
+                        },
+                        LeadTime: {
+                            title: 'LeadTime',
+                            width: '5%'
+                        }
+                    }
+                }
+            }
+        },
+        height: 300,
+        scrollable: true,
+        resizable: true,
+        sortable: true,
+        columns: [
+            {
+                field: "Id",
+                title: "Id",
+                hidden: true
+            },
+            {
+                field: "SupplierOrderId",
+                title: "SupplierOrder Id"
+            },
+            {
+                field: "ItemName",
+                title: "Item Name"
+            },
+            {
+                field: "ItemCode",
+                title: "Item Code"
+            },
+            {
+                field: "SupplierName",
+                title: "Supplier Name"
+            },
+            {
+                field: "TotalQty",
+                title: "Total Qty"
+            },
+            {
+                field: 'TotalBox',
+                title: 'Total Box'
+            },
+            {
+                field: "TotalValue",
+                title: "Total Value"
+            },
+            {
+                field: "TotalCVM",
+                title: "Total CBM"
+            },
+            {
+                field: "OrderDateString",
+                title: "Order Created Date"
+            },
+            {
+                field: "PortOfLoading",
+                title: "Port Of Loading"
+            },
+            {
+                field: "BatchNo",
+                title: "Batch No"
+            },
+            {
+                field: "WarehouseRoot",
+                title: "Warehouse Root"
+            },
+            {
+                field: "LeadTime",
+                title: "LeadTime"
+            }
+        ],
+
+    }).data("kendoGrid");
+</script>

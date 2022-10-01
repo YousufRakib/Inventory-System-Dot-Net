@@ -1,0 +1,15 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<appSettings>
+	
+	
+  <!--<add key="SQLServerConnectionString" value="Data source=mssql.arsukeuro.com;Initial Catalog=arsukeuro_mssql;User ID=arskuksql;Password=india@123"/>-->
+  <!--<add key="SQLServerConnectionString" value="Data source=.;Initial Catalog=arsukeuro_mssql;Integrated Security=True"/>-->
+	
+  <!--<add key="SQLServerConnectionString" value="Data Source=.;Initial Catalog=arsukeuro_mssql;User ID=adm;Password=Hn)91234"/>-->
+	<!--<add key="SQLServerConnectionString" value="Data source=LAPTOP-NUPR82VN;Initial Catalog=arsukeuro_mssql;User ID=sa;Password=123456"/>-->
+  <!--<add key="SQLServerConnectionString" value="Data Source=.;Initial Catalog=arsukeuro_mssql;Integrated Security=True"/>-->
+ <!-- Data Source=muddassir-pc\sqlexpress;Initial Catalog=InventoryManager;Integrated Security=True-->
+  <!--<add key="SQLServerConnectionString" value="Data Source=DANISH;Initial Catalog=arsukeuro_mssql;User ID=sa;Password=12345"/>-->
+</appSettings> 
+
+

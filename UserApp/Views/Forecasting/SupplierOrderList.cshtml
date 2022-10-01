@@ -1,0 +1,163 @@
+﻿@{ ViewBag.Title = "SupplierOrderList";
+                Layout = "~/Views/shared/_LoggedInLayout.cshtml"; }
+
+@using AkraTechFramework.Helpers
+
+<div class="row-fluid">
+    <div class="span12 control-group">
+        <h2 style="text-align:center;color: green;">Supplier Order List View</h2>
+    </div>
+</div>
+
+<div id="dialog-confirm" title="Are you sure you want to delete?"></div>
+<div id="tblSupplierOrderListView"></div>
+
+<script>
+
+    $(document).ready(pageLoad);
+
+    function pageLoad() {
+        loadSupplierOrderList()
+    }
+
+    function loadSupplierOrderList() {
+        $('#tblSupplierOrderListView').jtable({
+            title: 'Supplier Order List',
+            useBootstrap: true,
+            sorting: true,
+
+            actions: {
+                listAction: '@Url.Action("GetSupplierOrderList")'
+            },
+            fields: {
+                Id: {
+                    key: true,
+                    list: false
+                },
+                SupplierOrderId: {
+                    title: 'SupplierOrder Id',
+                    width: '4%'
+                },
+                SupplierName: {
+                    title: 'Supplier Name',
+                    width: '8%'
+                },
+                ShipmentTitle: {
+                    title: 'Shipment Title',
+                    width: '8%'
+                },
+                Currency: {
+                    title: 'Currency',
+                    width: '4%'
+                },
+                TotalValue: {
+                    title: 'Total PI Value',
+                    width: '4%'
+                },
+                DepositPercentage: {
+                    title: 'Deposit Percentage',
+                    width: '4%'
+                },
+                DepositAmount: {
+                    title: 'Deposit Amount',
+                    width: '7%'
+                },
+                DepositDateString: {
+                    title: 'Deposit Date',
+                    width: '4%'
+                },
+                RemainingBalance: {
+                    title: 'Remaining Balance',
+                    width: '5%'
+                },
+                LeadTime: {
+                    title: 'LeadTime',
+                    width: '4%'
+                },
+                ETDDateString: {
+                    title: 'ETD Date',
+                    width: '4%'
+                },
+                CutOffDateString: {
+                    title: 'Cut Off Date',
+                    width: '4%'
+                },
+                TotalCVM: {
+                    title: 'Volume',
+                    width: '4%'
+                },
+                PortOfLoading: {
+                    title: 'Port Of Loading',
+                    width: '5%'
+                },
+                PortOfArrival: {
+                    title: 'Port Of Arrival',
+                    width: '5%'
+                },
+                WarehouseRoot: {
+                    title: 'Warehouse Root',
+                    width: '4%'
+                },
+
+                History: {
+                    display: function (data) {
+                        return String.format("<a class='btn btn-success btn-mini' href='ViewSupplierOrder/{0}'>History</a>", data.record.Id);
+                    },
+                    width: '2%'
+                },
+                Remove: {
+                    display: function (data) {
+                        return String.format("<a class='btn btn-success btn-mini' onclick=\"RemoveSupplierOrder({0})\">Remove</a>", data.record.Id);
+                    },
+                    width: '2%'
+                },
+            },
+            toolbar: {
+                items: [{
+                    icon: '../../Content/images/add_icon.png',
+                    text: 'Add SupplierOrder',
+                    click: addSupplierOrder
+                }]
+            }
+        });
+        $('#tblSupplierOrderListView').jtable('load');
+    }
+
+    function RemoveSupplierOrder(Id) {
+        $("#dialog-confirm").dialog({
+            resizable: true,
+            height: 140,
+            modal: true,
+            buttons: {
+                "Yes": function () {
+
+                    $.ajax({
+                        url: '@Url.Action("RemoveSupplierOrder/")' + Id,
+                        type: 'POST',
+                        success: function (result) {
+                            if (result.Result=="OK")
+                            {
+                                alert('Data remove successfully!!');
+                                $('#tblSupplierOrderListView').jtable('load');
+                            }
+                            else
+                            {
+                                alert('You did not delete!!');
+                                $('#tblSupplierOrderListView').jtable('load');
+                            }
+                        }
+                    });
+                    $(this).dialog("close");
+                },
+                "No": function () {
+                    $(this).dialog("close");
+                }
+            }
+        });
+    }
+
+    function addSupplierOrder() {
+        $(location).attr("href","@Url.Action("SupplierOrderSelection")")
+    }
+
+</script>

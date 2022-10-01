@@ -1,0 +1,360 @@
+﻿
+@{
+    ViewBag.Title = "ForecastingView";
+    Layout = "~/Views/shared/_LoggedInLayout.cshtml";
+}
+
+@using AkraTechFramework.Helpers
+
+<style>
+    div.jtable-main-container > table.jtable > thead th.jtable-column-header div.jtable-column-header-container {
+        height: 60px;
+        margin-left: 4px;
+    }
+</style>
+
+<div class="row-fluid" style="margin-top:5px;margin-left:2%;">
+    <div class="span8 control-group" style="margin-left:2%;">
+    </div>
+    <div class="span1 control-group" style="margin-left:5.5%;">
+        <button style="width: 120%; background-color: forestgreen; color: white; border-radius: 5%; border-width: 0px; height: 30px; " onclick="location.href='@Url.Action("ItemForecastingList", "Forecasting")';return false;" type="button">Item Forecasting</button>
+    </div>
+    <div class="span1 control-group" style="margin-left:2%;">
+        <button style="width: 120%; background-color: forestgreen; color: white; border-radius: 5%; border-width: 0px; height: 30px; " onclick="location.href='@Url.Action("SupplierOrderList", "Forecasting")';return false;" type="button">Supplier Order</button>
+    </div>
+    <div class="span1 control-group" style="margin-left:2%;">
+        <button style="width: 120%; background-color: forestgreen; color: white; border-radius: 5%; border-width: 0px; height:30px;" onclick="location.href='@Url.Action("CreateShipmentList", "Forecasting")';return false;" type="button">Create Shipment</button>
+    </div>
+</div>
+
+<div class="row-fluid">
+    <div class="span12 control-group">
+        <h2 style="text-align:center;color: green;">Forecasting View</h2>
+    </div>
+</div>
+
+<div class="row-fluid" style="margin-left:2%;">
+    <div class="span4 control-group">
+        <label class="control-label" for="ItemName">Search By</label>
+        <div class="filtering">
+            <form>
+                <div class="input-append" style="width:100%;">
+                    <div class="span6 control-group" style="margin-left:0%;">
+                        <select id="filter" style="width:96%;">
+                            <option value="ItemName">ItemName</option>
+                            @*<option value="ItemCode">ItemCode</option>
+                                <option value="LowStock">LowStock</option>
+                                <option value="AvaliableStockGreater">Available Stock >=</option>
+                                <option value="AvaliableStockLesser">Available Stock <=</option>
+                                <option value="Supplier">Supplier</option>*@
+                        </select>
+                    </div>
+                    <div class="span6 control-group" style="margin-left:0%;">
+                        <input style="margin-left: 0px;width:89%" id="filterText" type="text">
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="span4 control-group" style="margin-left:0px;">
+        <label class="control-label" for="ItemName">Current: (From Date - To Date)</label>
+        @Html.TextBox("txtCurrentStartDate", DateTime.Now.ToShortDateString(), new
+        {
+            @class = "span6 datepicker",
+            @readonly = "readonly",
+            @style = "cursor:pointer; background-color:white",
+            @placeholder = "From Date"
+        })
+
+        @Html.TextBox("txtCurrentEndDate", DateTime.Now.ToShortDateString(), new
+        {
+            @class = "span6 datepicker",
+            @readonly = "readonly",
+            @style = "cursor:pointer; background-color:white",
+            @placeholder = "To Date"
+        })
+
+    </div>
+
+    <div class="span4 control-group" style="margin-left: 0px; margin-left: 2%">
+        <label class="control-label" for="ItemName">Last Year: (From Date - To Date)</label>
+        @Html.TextBox("txtLastYearStartDate", DateTime.Now.AddYears(-1).ToShortDateString(), new
+        {
+            @class = "span6 datepicker",
+            @readonly = "readonly",
+            @style = "cursor:pointer; background-color:white",
+            @placeholder = "From Date"
+        })
+
+        @Html.TextBox("txtLastYearEndDate", DateTime.Now.AddYears(-1).ToShortDateString(), new
+        {
+            @class = "span6 datepicker",
+            @readonly = "readonly",
+            @style = "cursor:pointer; background-color:white",
+            @placeholder = "To Date"
+        })
+
+    </div>
+</div>
+
+<div class="row-fluid" style="margin-top:5px;margin-left:2%;">
+    <div class="span4 control-group" style="margin-left:0%;">
+        @Html.Label("forecastingPeriodLabel", "Forecasting Period", new { @class = "control -label" })
+        @Html.TextBox("forecastingPeriod", "", new { @class = "span12", @style = "border-radius:4px;width:95%;", @type = "number", @Value = "0", @min = 0 })
+    </div>
+
+    <div class="span4 control-group" style="margin-left:0px;">
+        <div class="span6 control-group" style="margin-left:0%;">
+            @Html.Label("depositDaysLabel", "Deposit Days", new { @class = "control -label" })
+            @Html.TextBox("depositDays", "", new { @class = "span12", @style = "border-radius:4px;", @type = "number", @Value = "0", @min = 0 })
+        </div>
+
+        <div class="span6 control-group" style="margin-left:2%;">
+            @Html.Label("increment", "Increment", new { @class = "control -label" })
+            @Html.TextBox("increment", "", new { @class = "span12", @style = "border-radius:4px;", @type = "number", @Value = "0", @min = 0 })
+        </div>
+    </div>
+
+    <div class="span4 control-group" style="margin-left:2%;">
+        @Html.Label("manufacturePeriodAndShipingDaysLabel", "ManufacturePeriod+ShipingDays", new { @class = "control -label" })
+        @Html.TextBox("manufacturePeriodAndShipingDays", "", new { @class = "span12", @style = "border-radius:4px;", @type = "number", @Value = "0", @min = 0 })
+    </div>
+
+
+</div>
+
+<div class="row-fluid" style="margin-top:5px;margin-left:2%;">
+    <div class="span10 control-group" style="margin-left:2%;">
+    </div>
+    <div class="span1 control-group" style="margin-left:0%;">
+        <button style="margin-left:80%;margin-top:-20%;width:120%;" class="btn" id="LoadRecordsButton" onclick="FindForecasting()" type="button">Search</button>
+    </div>
+</div>
+
+<div id="tblForecastingView"></div>
+
+<script>
+    $(document).ready(pageLoad);
+
+    function pageLoad() {
+        $(".datepicker").datepicker();
+        $(".datepicker").datepicker("option", "dateFormat", "d M, y");
+
+        LoadForecasting();
+        //FindForecasting();
+    }
+
+    const months = [
+        'Jan',
+        'Feb',
+        'Mar',
+        'Apr',
+        'May',
+        'Jun',
+        'Jul',
+        'Aug',
+        'Sep',
+        'Oct',
+        'Nov',
+        'Dec'
+    ]
+
+    $("#txtCurrentStartDate").change(function () {
+        var startDate = $("#txtCurrentStartDate").val()
+        var startDateToDate = new Date(startDate);
+
+        var year = startDateToDate.getFullYear();
+        const monthName = months[startDateToDate.getMonth()];
+        var day = startDateToDate.getDate();
+
+        const formattedDate = `${day} ${monthName}, ${year-1}`
+        $("#txtLastYearStartDate").val(formattedDate);
+    });
+
+    $("#txtCurrentEndDate").change(function () {
+        var endDate = $("#txtCurrentEndDate").val()
+        var endDateToDate = new Date(endDate);
+
+        var year = endDateToDate.getFullYear();
+        const monthName = months[endDateToDate.getMonth()];
+        var day = endDateToDate.getDate();
+
+        const formattedDate = `${day} ${monthName}, ${year - 1}`
+        $("#txtLastYearEndDate").val(formattedDate);
+    });
+
+    function isDisabledAuto() {
+        var source = $("#filter").val()
+
+        return !(source == 'ItemName' || source == 'Supplier')
+    }
+
+    $("#filter").change(function () {
+        $("#filterText").autocomplete({
+            disabled: isDisabledAuto()
+        })
+    });
+
+    $("#filterText").autocomplete({
+        disabled: false,
+        source: function (request, response) {
+            var source = $("#filter").val()
+            var url=''
+
+            if (source == 'ItemName') {
+                url = '@Url.Action("LookupItem")'
+            }
+            else if (source == 'Supplier') {
+                url = '@Url.Action("LookupSupplier")'
+            }
+            $.get(url, {
+                searchText: request.term,
+                onlyItemName:true
+            }, function (data) {
+                response(data);
+            });
+        },
+        minLength: 1,
+        change: function (event, ui) {
+
+        },
+        select: function (event, ui) {
+
+        }
+    });
+
+    function FindForecasting()
+    {
+        if ($('#txtCurrentStartDate').val() == '' || $('#txtCurrentEndDate').val() == '' || $('#txtLastYearStartDate').val() == '' || $('#txtLastYearEndDate').val() == '') {
+            alert('Kindly fillup all the date field!!')
+        }
+        else {
+            const currentStartDate = `${new Date($('#txtCurrentStartDate').val()).getDate()} ${months[new Date($('#txtCurrentStartDate').val()).getMonth()]}, ${new Date($('#txtCurrentStartDate').val()).getFullYear()}`;
+            const currentEndDate = `${new Date($('#txtCurrentEndDate').val()).getDate()} ${months[new Date($('#txtCurrentEndDate').val()).getMonth()]}, ${new Date($('#txtCurrentEndDate').val()).getFullYear()}`;
+
+            $('#tblForecastingView').jtable('load', { currentStartDate: currentStartDate, currentEndDate: currentEndDate, lastYearStartDate: $('#txtLastYearStartDate').val(), lastYearEndDate: $('#txtLastYearEndDate').val(), forecastingPeriod: $('#forecastingPeriod').val(), increment: $('#increment').val(), depositDays: $('#depositDays').val(), manufacturePeriodAndShipingDays: $('#manufacturePeriodAndShipingDays').val(), filterText: $('#filterText').val() });
+        }
+    }
+
+    function LoadForecasting()
+    {
+        $('#tblForecastingView').jtable({
+            title: 'Forecasting View',
+            useBootstrap: true,
+            sorting: true,
+            selectingCheckboxes: true,
+            actions: {
+                listAction: '@Url.Action("GetForecastingView")' + '?currentStartDate=' + $('#txtCurrentStartDate').val() + '&currentEndDate=' + $('#txtCurrentEndDate').val() + '&lastYearStartDate=' + $('#txtLastYearStartDate').val() + '&lastYearEndDate=' + $('#txtLastYearEndDate').val() + '&forecastingPeriod=' + $('#forecastingPeriod').val() + '&increment=' + $('#increment').val() + '&depositDays=' + $('#depositDays').val() + '&manufacturePeriodAndShipingDays=' + $('#manufacturePeriodAndShipingDays').val() + '&filterText=' + $('#filterText').val() //+ '&filter=' + $('#filter').val()
+            },
+            recordsLoaded: function (event, data) {
+
+                var recordsFound = String.format(" {0} Records - Forecasting View - From {1} to {2}", data.records.length, $('#txtCurrentStartDate').val(), $('#txtCurrentEndDate').val())
+                $('#tblForecastingView').find('.jtable-title-text').html(recordsFound);
+
+                },
+            fields:
+            {
+                ItemName: {
+                    title: 'Item Name',
+                    width: '10%'
+                    },
+                MarketPlace: {
+                    title: 'W.ROOT',
+                    width: '8%'
+                },
+                CurrentYearSold: {
+                    title: 'Current DateRange Sold',
+                    width: '8%'
+                },
+                LastYearSold: {
+                    title: 'LastYear DateRange Sold',
+                    width: '8%'
+                },
+                TargetSellingAvg: {
+                    title: 'Target Selling',
+                    width: '8%'
+                },
+                ForecastingPeriod: {
+                    title: 'Average Duration DaysSold',
+                    width: '8%'
+                },
+                AvgSold: {
+                    title: 'Average Sold/Days',
+                    width: '8%'
+                },
+                Increment: {
+                    title: 'Enter Increment%',
+                    width: '8%'
+                },
+                ActualTargetSellingQty: {
+                    title: 'Actual Target Selling QTY',
+                    width : '8%'
+                },
+
+                WarehouseStock: {
+                    title: 'Warehouse Stock',
+                    width: '8%'
+                },
+                FBAStock: {
+                    title: 'FBA Stock',
+                    width: '8%'
+                },
+                TotalStock: {
+                    title: 'Total',
+                    width: '8%'
+                },
+                SoldPerDay: {
+                    title: 'Sold/Days',
+                    width: '8%'
+                },
+                DepositDays: {
+                    title: 'Deposit Days (Before Order)',
+                    width: '8%'
+                },
+                ManufacturePeriodAndShippingDays: {
+                    title: 'Manufacturer Period + Shipping(Days)',
+                    width: '8%'
+                },
+                CurrentStockSurvivalDays: {
+                    title: 'Curren Stock Survival Days',
+                    width: '8%'
+                },
+                WithoutStockDays: {
+                    title: 'Without Stock Days/Extra Stock',
+                    width: '8%'
+                },
+                OrderReceivingDaysBeforeSelling: {
+                    title: 'Order Receiving Days Before Selling',
+                    width: '8%'
+                },
+                ActualForecastingDays: {
+                    title: 'Actual Forcasting Days',
+                    width: '8%'
+                },
+                StockRequired: {
+                    title: 'Stock Requied to Target Period',
+                    width: '8%'
+                },
+                TotalQtyNeedToOrder: {
+                    title: 'Total Qty Need to Order',
+                    width: '8%'
+                },
+                OrderStatus: {
+                    title: 'Order Status',
+                    width: '8%'
+                },
+                StockTargetPeriodDays: {
+                    title: 'Extra/Less Stock Target Period Days',
+                    width: '8%'
+                },
+                StatusOfPeriod: {
+                    title: 'Status of Period',
+                    width: '8%'
+                }
+            }
+
+        });
+    }
+
+</script>

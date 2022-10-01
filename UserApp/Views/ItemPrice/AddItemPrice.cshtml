@@ -1,0 +1,136 @@
+﻿@model Infrastrucutre.Core.Models.ItemPrice
+
+@{
+    ViewBag.Title = "AddItemPrice";
+    Layout = "~/Views/shared/_LoggedInLayout.cshtml";
+    var mode = ViewBag.Mode;
+}
+
+<h2>
+      @if (mode == "Create")
+       {
+          @Html.DisplayText("Add ItemPrice");
+       }
+      else
+      {
+          @Html.DisplayText("Edit ItemPrice");
+      } 
+</h2>
+
+@using (Html.BeginForm("AddItemPrice","ItemPrice" ))
+{
+    @Html.AntiForgeryToken()
+    @Html.ValidationSummary(true)
+
+    if (mode == "Create")
+    {
+        @Html.Hidden("ItemPriceID","0")
+    }
+    else
+    {
+        @Html.HiddenFor(m=>m.ItemPriceID)    
+    }
+
+    <fieldset>
+        <legend>ItemPrice Details</legend>
+        <div class="row-fluid">
+            <div class="span3 control-group">
+                @Html.LabelFor(model => model.FBARootId, new { @class = "control-label" })
+
+                @Html.DropDownList("FBARootId", ViewBag.InvLocation as SelectList, "Select Wearhouse")
+                @if (mode != "Create")
+                {
+                    @Html.HiddenFor(x => x.FBARootId)
+                }
+            </div>
+
+            <div class="span3 control-group">
+                @Html.LabelFor(model => model.ItemMasterID, new { @class = "control-label" })
+                @Html.DropDownList("ItemMasterID", ViewBag.ItemList as SelectList, "Select Item")
+                @if (mode != "Create")
+                {
+                    @Html.HiddenFor(x => x.ItemMasterID)
+                }
+            </div>
+
+            @*<div class="span3 control-group">
+            @Html.LabelFor(model => model.ItemMasterID, new { @class = "control-label" })
+
+
+            @if (mode == "Create")
+            {
+                <input id="ItemMasterID2" type="text">
+                @Html.HiddenFor(x => x.ItemMasterID)
+            }
+            else
+            {
+                @Html.DropDownList("ItemMasterID", ViewBag.ItemList as SelectList, "Select Item")
+                @Html.HiddenFor(x => x.ItemMasterID)
+            }
+        </div>*@
+            <div class="span3 control-group">
+                @Html.LabelFor(model => model.Vat, new { @class = "control-label" })
+                @Html.TextBoxFor(model => model.Vat, new { @class = "span12", @type = "number", @value = ViewBag.VatVal, @min = 0, @max = 100 })
+                @Html.ValidationMessageFor(model => model.Vat)
+            </div>
+            <div class="span3 control-group">
+                @Html.Label("Cost", new { @class = "control-label" })
+                @Html.TextBoxFor(model => model.OriginalPrice, new { @class = "span12" })
+                @Html.ValidationMessageFor(model => model.OriginalPrice)
+            </div>
+        </div> 
+
+       <div class="text-center widget-footer">                      
+           @Html.ActionLink("Back to List", "Index", null, new {@class="btn" })
+
+             @if (mode == "Create")
+            {
+                <button type="submit" class="btn btn-success" name="command" value="Save">Save</button>   
+            }
+            else
+            {
+                <button type="submit"  class="btn btn-success" name="command" value="Update">Update</button>     
+            }           
+       </div>
+    </fieldset>
+}
+
+<div>
+    
+</div>
+
+
+<script>
+    @*$("#ItemMasterID2").autocomplete({
+            source: function (request, response) {
+                $.ajax({
+                    url: '@Url.Action("LookupItem", "ItemPrice")',
+                    datatype: "json",
+                    data: {
+                        searchText: request.term,
+                        onlyItemName: true
+                    },
+                    success: function (data) {
+                        response($.map(data, function (val, item) {
+                            return {
+                                label: val.label,
+                                value: val.label,
+                                itemMasterID: val.id
+                            }
+                        }))
+                    }
+                })
+            },
+            select: function (event, ui) {
+                $("#ItemMasterID").val(ui.item.itemMasterID);
+            }
+        });*@
+
+    var mode = '@mode';
+    if (mode != "Create") {
+
+            $("#ItemMasterID").attr("disabled","true");
+            $("#FBARootId").attr("disabled","true");
+
+    }
+</script>

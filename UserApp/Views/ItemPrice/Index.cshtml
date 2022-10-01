@@ -1,0 +1,198 @@
+﻿@model Infrastrucutre.Core.Models.ItemPrice
+
+@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/shared/_LoggedInLayout.cshtml";
+}
+
+<div class="modal hide fade" id="modalPriceHistory" style="width: 60%;height:80%;margin-right: 20%;">
+    <div class="modal-body">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h3 id="itemNameHistory"></h3>
+    </div>
+    <div class="modal-body">
+        <div style="width: 100%;height:100%">
+            <div id="priceHistoryTable"></div>
+        </div>
+    </div>
+</div>
+<div id="dialog-confirm" title="Are you sure you want to delete?"></div>
+<div id="tblItemPrices"></div>
+
+<script>
+
+    $(document).ready(pageLoad);
+
+    function pageLoad() {
+        loadItemPrices()
+        SetupItemPriceHistory();
+    }
+
+    function loadItemPrices() {
+        $('#tblItemPrices').jtable({
+            title: 'ItemPrice Master',
+            useBootstrap: true,
+            sorting: true,
+
+            actions: {
+                listAction: '@Url.Action("GetItemPrices")'
+            },
+            fields: {
+                ItemPriceID: {
+                    key: true,
+                    list: false
+                },
+                ItemName: {
+                    title: 'Item Name',
+                    width: '6%'
+                },
+                FBARootName: {
+                    title: 'WareHouse Name',
+                    width: '6%'
+                },
+                Vat: {
+                    title: 'Vat',
+                    width: '7%'
+                },
+                OriginalPrice: {
+                    title: 'Cost',
+                    width: '7%'
+                },
+                RoundPrice: {
+                    title: 'Total Cost',
+                    width: '7%'
+                },
+                UDate: {
+                    title: 'Modified Date',
+                    width: '7%'
+                },
+
+                Edit: {
+                    display: function (data) {
+                        return String.format("<a class='btn btn-success btn-mini' href='GetItemPriceByID/{0}'>Edit</a>", data.record.ItemPriceID);
+                    },
+                    width: '2%'
+                },
+                Remove: {
+                    display: function (data) {
+                        return String.format("<a class='btn btn-success btn-mini' onclick=\"RemoveItemPrice({0})\">Remove</a>", data.record.ItemPriceID);
+                    },
+                    width: '2%'
+                },
+                History: {
+                    display: function (data) {
+                        var data = String.format("<a class='btn btn-success btn-mini' onclick='showHistory({0},{1})'>History</a>",
+                            data.record.ItemPriceID
+                            , '"' + data.record.ItemName + '"');
+
+                        return data
+                    },
+                    edit: false,
+                    width: '2%',
+                },
+            },
+            toolbar: {
+                items: [{
+                    icon: '../../Content/images/add_icon.png',
+                    text: 'Add ItemPrice',
+                    click: addItem
+                }]
+            }
+        });
+        $('#tblItemPrices').jtable('load');
+    }
+
+    function SetupItemPriceHistory() {
+        $('#priceHistoryTable').jtable({
+            title: 'Item Price History',
+            useBootstrap: true,
+            paging: true,
+            pageSizes :[6,12,18,24,30,500],
+            pageList: 'minimal',
+            actions: {
+                listAction: '@Url.Action("GetItemPriceHistory")'
+            },
+            fields: {
+                ItemPriceID: {
+                    key: true,
+                    list: false
+                },
+                ItemName: {
+                    title: 'Item Name',
+                    width: '6%'
+                },
+                FBARootName: {
+                    title: 'WareHouse Name',
+                    width: '6%'
+                },
+                Vat: {
+                    title: 'Vat',
+                    width: '7%'
+                },
+                OriginalPrice: {
+                    title: 'Cost',
+                    width: '7%'
+                },
+                RoundPrice: {
+                    title: 'Total Cost',
+                    width: '7%'
+                },
+                UDate: {
+                    title: 'Modified Date',
+                    width: '7%'
+                },
+            },
+            toolbar: {
+
+            }
+        });
+    }
+
+    function showHistory(ItemPriceID, ItemName) {
+        $('#itemNameHistory').text(ItemName)
+        $('#priceHistoryTable').jtable('load', { id: ItemPriceID });
+        $('#modalPriceHistory').modal('show');
+    }
+
+    function RemoveItemPrice(ItemPriceID) {
+        $("#dialog-confirm").dialog({
+            resizable: true,
+            height: 140,
+            modal: true,
+            buttons: {
+                "Yes": function () {
+
+                    $.ajax({
+                        url: '@Url.Action("RemoveItemPrice/")' + ItemPriceID,
+                        type: 'POST',
+                        success: function (result) {
+                            //alert(result.Message);
+                            //$('#tblItemPrices').jtable('load');
+
+                            if (result.Result=="OK")
+                            {
+                                alert('Data remove successfully!!');
+                                $('#tblItemPrices').jtable('load');
+                            }
+                            else
+                            {
+                                alert('You Are Not Admin!!');
+                                $('#tblItemPrices').jtable('load');
+                            }
+                        }
+                    });
+                    $(this).dialog("close");
+                },
+                "No": function () {
+                    $(this).dialog("close");
+                }
+            }
+        });
+    }
+
+    function addItem() {
+        $(location).attr("href","@Url.Action("AddItemPrice")")
+    }
+
+</script>
+

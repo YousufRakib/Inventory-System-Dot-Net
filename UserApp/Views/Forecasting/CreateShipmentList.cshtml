@@ -1,0 +1,280 @@
+﻿@{ 
+    ViewBag.Title = "CreateShipment List";
+    Layout = "~/Views/shared/_LoggedInLayout.cshtml";
+}
+
+<div class="modal hide fade" id="modalHistory" style="width: 60%;height:80%;margin-right: 20%;">
+    <div class="modal-body">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h3 id="shipmentHistory"></h3>
+    </div>
+    <div class="modal-body">
+        <div style="width: 100%;height:100%">
+            <div id="shipmentHistoryTable"></div>
+        </div>
+    </div>
+</div>
+
+<div class="row-fluid">
+    <div class="span12 control-group">
+        <h2 style="text-align:center;color: green;">Shipment List View</h2>
+    </div>
+</div>
+
+<div id="dialog-confirm" title="Are you sure you want to delete?"></div>
+<div id="tblCreateShipmentListView"></div>
+
+<script>
+
+    $(document).ready(pageLoad);
+
+    function pageLoad() {
+        loadCreateShipmentList()
+        SetupShipmentHistory()
+    }
+
+    function loadCreateShipmentList() {
+        $('#tblCreateShipmentListView').jtable({
+            title: 'Create Shipment List',
+            useBootstrap: true,
+            sorting: true,
+
+            actions: {
+                listAction: '@Url.Action("GetCreateShipment")'
+            },
+            fields: {
+                Id: {
+                    key: true,
+                    list: false
+                },
+                ShipmentOrderId: {
+                    title: 'SupplierOrder Id',
+                    width: '4%'
+                },
+                ShipmentId: {
+                    title: 'Shipment Id',
+                    width: '4%'
+                },
+                WarehouseRoot: {
+                    title: 'Warehouse Root',
+                    width: '5%'
+                },
+                ShipmentTitle: {
+                    title: 'Shipment Title',
+                    width: '5%'
+                },
+                PortOfLoading: {
+                    title: 'Port Of Loading',
+                    width: '5%'
+                },
+                PortOfArrival: {
+                    title: 'Port Of Arring',
+                    width: '5%'
+                },
+                Currency: {
+                    title: 'Currency',
+                    width: '2%'
+                },
+                TotalValue: {
+                    title: 'Total Value Goods',
+                    width: '5%'
+                },
+                PaidDeposit: {
+                    title: 'Paid Deposit',
+                    width: '4%'
+                },
+                RemainingBalance: {
+                    title: 'Remaining Balance',
+                    width: '4%'
+                },
+                ContainerSize: {
+                    title: 'Container Size',
+                    width: '5%'
+                },
+                TotalCVM: {
+                    title: 'Volume',
+                    width: '3%'
+                },
+                ETDDateString: {
+                    title: 'Final ETA',
+                    width: '4%'
+                },
+                CaseWorker: {
+                    title: 'Case Worker',
+                    width: '5%'
+                },
+                BookingAgent: {
+                    title: 'Booking Agent',
+                    width: '5%'
+                },
+                ClearingAgent: {
+                    title: 'Clearing Agent',
+                    width: '5%'
+                },
+
+                Details: {
+                    display: function (data) {
+                        return String.format("<a class='btn btn-success btn-mini' href='ViewCreateShipment/{0}'>Details</a>", data.record.Id);
+                    },
+                    width: '2%'
+                },
+                Edit: {
+                    display: function (data) {
+                        return String.format("<a class='btn btn-success btn-mini' href='EditCreateShipment/{0}'>Edit</a>", data.record.Id);
+                    },
+                    width: '2%'
+                },
+                History: {
+                    display: function (data) {
+                        return String.format("<a class='btn btn-success btn-mini' onclick=\"showHistory({0})\">History</a>", data.record.Id);
+                    },
+                    width: '2%'
+                },
+                File: {
+                    display: function (data) {
+                        return String.format("<a class='btn btn-success btn-mini' onclick=\"ExportFile({0})\">Download_History</a>", data.record.Id);
+                    },
+                    width: '2%'
+                },
+                Remove: {
+                    display: function (data) {
+                        return String.format("<a class='btn btn-success btn-mini' onclick=\"RemoveCreateShipment({0})\">Remove</a>", data.record.Id);
+                    },
+                    width: '2%'
+                },
+            },
+            toolbar: {
+                items: [{
+                    icon: '../../Content/images/add_icon.png',
+                    text: 'Create Shipment',
+                    click: createShipment
+                }]
+            }
+        });
+        $('#tblCreateShipmentListView').jtable('load');
+    }
+
+    function RemoveCreateShipment(Id) {
+        $("#dialog-confirm").dialog({
+            resizable: true,
+            height: 140,
+            modal: true,
+            buttons: {
+                "Yes": function () {
+
+                    $.ajax({
+                        url: '@Url.Action("RemoveCreateShipment/")' + Id,
+                        type: 'POST',
+                        success: function (result) {
+                            if (result.Result=="OK")
+                            {
+                                alert('Data remove successfully!!');
+                                $('#tblCreateShipmentListView').jtable('load');
+                            }
+                            else
+                            {
+                                alert('You did not delete!!');
+                                $('#tblCreateShipmentListView').jtable('load');
+                            }
+                        }
+                    });
+                    $(this).dialog("close");
+                },
+                "No": function () {
+                    $(this).dialog("close");
+                }
+            }
+        });
+    }
+
+    function ExportFile(Id) {
+        $.ajax({
+            type: "POST",
+            url: '@Url.Action("ExportExcelFile/")' + Id,
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+        }).done(function (data) {
+            if (data.fileName != "") {
+                @*$(location).attr("href","@Url.Action("CreateShipment")")*@
+                window.location.href = "@Url.RouteUrl(new { Controller = "Forecasting", Action = "Download" })/?fileName=" + data.fileName;
+            }
+        });
+    }
+
+    function createShipment() {
+        $(location).attr("href","@Url.Action("CreateShipment")")
+    }
+
+    function showHistory(Id) {
+        $('#shipmentHistory').text()
+        $('#shipmentHistoryTable').jtable('load', { id: Id });
+        $('#modalHistory').modal('show');
+    }
+
+    function SetupShipmentHistory() {
+        $('#shipmentHistoryTable').jtable({
+            title: 'Shipment History',
+            useBootstrap: true,
+            paging: true,
+            pageSizes :[6,12,18,24,30,500],
+            pageList: 'minimal',
+            actions: {
+                listAction: '@Url.Action("GetShipmentHistory")'
+            },
+            fields: {
+                ShipmentOrderId: {
+                    title: 'ShipmentOrder Id',
+                    width: '3%'
+                },
+                SupplierOrderId: {
+                    title: 'SupplierOrder Id',
+                    width: '3%'
+                },
+                OrderId: {
+                    title: 'Order Id',
+                    width: '2%'
+                },
+                OrderDate: {
+                    title: 'OrderDate',
+                    width: '2%'
+                },
+                ShipmentTitle: {
+                    title: 'Shipment Title',
+                    width: '3%'
+                },
+                SupplierName: {
+                    title: 'Supplier Name',
+                    width: '4%'
+                },
+                ItemName: {
+                    title: 'Item Name',
+                    width: '3%'
+                },
+                WarehouseRoot: {
+                    title: 'WarehouseRoot',
+                    width: '3%'
+                },
+                SupplierCost: {
+                    title: 'SupplierCost',
+                    width: '2%'
+                },
+                TotalQty: {
+                    title: 'TotalQty',
+                    width: '3%'
+                },
+                TotalValue: {
+                    title: 'TotalValue',
+                    width: '4%'
+                },
+                TotalBox: {
+                    title: 'TotalBox',
+                    width: '3%'
+                }
+            },
+            toolbar: {
+
+            }
+        });
+    }
+
+</script>

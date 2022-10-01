@@ -1,0 +1,37 @@
+﻿﻿@{
+    ViewBag.Title = "Order Sheet Upload";
+    Layout = "~/Views/shared/_LoggedInLayout.cshtml";
+}
+
+@using AkraTechFramework.Helpers
+@{
+    string pageName = "Order Sheed Upload";
+    string searchString = ViewBag.ItemSearchString;
+}
+@if(ViewBag.Message != null)
+{
+    <text>
+        <script>
+            alert('@ViewBag.Message.ToString()');
+        </script>
+    </text>
+}
+@using (Html.BeginForm("OrderSheet", "Upload", FormMethod.Post, new { enctype = "multipart/form-data" }))
+{
+
+<div style="padding-top:5rem">
+    <div class="row-fluid">
+        <div class="span3">
+
+        </div>
+        <div class="span3 control-group">
+            <label class="control-label" for="ItemName">Upload Order Sheet</label>
+            <input id="fileUpload" name="fileUpload" type="file" />
+        </div>
+        <div class="span3 control-group" style="margin-top:20px;">
+            <input class="btn" type="submit" value="Upload" />
+            <button class="btn" id="Refresh" type="button" onclick="window.location.reload()">Clear</button>
+        </div>
+    </div>
+</div>
+}

@@ -1,0 +1,933 @@
+﻿@{
+    ViewBag.Title = "ItemForecasting";
+    Layout = "~/Views/shared/_ForecastingLayout.cshtml";
+}
+
+@using AkraTechFramework.Helpers
+
+<style>
+    div.jtable-main-container > table.jtable > thead th.jtable-column-header div.jtable-column-header-container {
+        height: 60px;
+        margin-left: 4px;
+    }
+</style>
+
+<div class="row-fluid">
+    <div class="span12 control-group">
+        <h2 style="text-align:center;color: green;">Item Forecasting</h2>
+    </div>
+</div>
+
+<div class="row-fluid" style="margin-left: 2%; width: 96.5%">
+    <div class="span1 control-group" style="margin-left: 0%; margin-right: 0%">
+
+        <input id="userName" type="hidden" value="@ViewBag.UserName" />
+
+        <label class="control-label">SCM Name</label>
+        <div class="span12 control-group" style="margin-left: 0%;">
+            <select class="control-label chosen" , Style="width:100%" data-val="true" id="UserID" name="UserID">
+                @foreach (var item in (ViewBag.UserID as System.Web.Mvc.SelectList).Items as List<Infrastrucutre.Core.Models.UserInformation>)
+                {
+                    <option value="@item.UserID ">@item.UserName</option>
+                }
+            </select>
+        </div>
+    </div>
+
+    <div class="span1 control-group" style="margin-left: 0.5%; margin-right: 0%">
+        <label class="control-label">W.Root</label>
+        <div class="span12 control-group" style="margin-left: 0%;">
+            <select class="control-label chosen" , Style="width:100%" data-val="true" id="FBARootID" name="FBARootID">
+                @foreach (var item in (ViewBag.FBARoot as System.Web.Mvc.SelectList).Items as List<Infrastrucutre.Core.Models.FBALocations>)
+                {
+                    if (ViewBag.FBARoot.SelectedValue == item.FBARootID)
+                    {
+                        <option value="@item.FBARootID" selected="selected">@item.FBARoot</option>
+                    }
+                    else
+                    {
+                        <option value="@item.FBARootID">@item.FBARoot</option>
+                    }
+                }
+            </select>
+        </div>
+    </div>
+
+    <div class="span2 control-group" style="margin-left:1%">
+        <label class="control-label">Select Item</label>
+        <select class="control-label chosen" , style="width:118%;" data-val="true" id="ItemMasterID" name="ItemMasterID">
+            @foreach (var item in (ViewBag.Items as System.Web.Mvc.SelectList).Items as List<Infrastrucutre.Core.Models.ItemMaster>)
+            {
+                <option value="@item.ItemMasterID ">@item.ItemName</option>
+            }
+        </select>
+    </div>
+
+    <div class="span4 control-group" style="margin-left:6%;width:34%;">
+        <div class="row-fluid">
+            <label class="control-label">Current: (From Date - To Date)</label>
+            @Html.TextBox("txtCurrentStartDate", DateTime.Now.ToShortDateString(), new
+            {
+                @class = "span6 datepicker",
+                @readonly = "readonly",
+                @style = "cursor:pointer; background-color:white",
+                @placeholder = "From Date"
+            })
+
+            @Html.TextBox("txtCurrentEndDate", DateTime.Now.ToShortDateString(), new
+            {
+                @class = "span6 datepicker",
+                @readonly = "readonly",
+                @style = "cursor:pointer; background-color:white;width:44.5%; margin-left:1%;",
+                @placeholder = "To Date"
+            })
+        </div>
+    </div>
+
+    <div class="span4 control-group" style="margin-left: 0px; margin-left: -0.5%;width:32.5%">
+        <div class="row-fluid">
+            <label class="control-label">Last Year: (From Date - To Date)</label>
+            @Html.TextBox("txtLastYearStartDate", DateTime.Now.AddYears(-1).ToShortDateString(), new
+            {
+                @class = "span6 datepicker",
+                @readonly = "readonly",
+                @style = "cursor:pointer; background-color:white;",
+                @placeholder = "From Date"
+            })
+
+            @Html.TextBox("txtLastYearEndDate", DateTime.Now.AddYears(-1).ToShortDateString(), new
+            {
+                @class = "span6 datepicker",
+                @readonly = "readonly",
+                @style = "cursor:pointer; background-color:white;width:49%; margin-left:1%;",
+                @placeholder = "To Date"
+            })
+        </div>
+    </div>
+</div>
+
+<div class="row-fluid" style="margin-top: 5px; margin-left: 2%; width: 96.5%">
+    <div class="span4 control-group" style="margin-left:0px;">
+        <div class="span5 control-group" style="margin-left:0%;">
+            @Html.Label("warehouseStockLabel", "Warehouse Stock", new { @class = "control -label" })
+            @Html.TextBox("warehouseStock", "", new { @class = "span12", @style = "border-radius:4px;", @readonly = "readonly", @type = "number", @Value = "0", @min = 0 })
+        </div>
+
+        <div class="span3 control-group" style="margin-left: 2%; margin-left: 2.8%">
+            @Html.Label("fbaStock", "FBA Stock", new { @class = "control -label" })
+            @Html.TextBox("fbaStock", "", new { @class = "span12", @style = "border-radius:4px;", @readonly = "readonly", @type = "number", @Value = "0", @min = 0 })
+        </div>
+
+        <div class="span3 control-group" style="margin-left:1%;">
+            @Html.Label("totalStock", "Total Stock", new { @class = "control -label" })
+            @Html.TextBox("totalStock", "", new { @class = "span12", @style = "border-radius:4px;width:130%", @readonly = "readonly", @type = "number", @Value = "0", @min = 0 })
+        </div>
+    </div>
+
+    <div class="span2 control-group" style="margin-left:2.5%;">
+        @Html.Label("averageDurationDays", "Average Duration(Days)", new { @class = "control -label" })
+        @Html.TextBox("averageDurationDays", "", new { @class = "span12", @style = "border-radius:4px;width:113.5%;", @type = "number", @Value = "0", @min = 0 })
+    </div>
+
+    <div class="span2 control-group" style="margin-left:1%;">
+        <button style="margin-left: 10%; width: 23%; margin-top: 9%; font-weight: bold;" class="btn" id="LoadRecordsButton" onclick="FindForecastingItem()" type="button">Next</button>
+    </div>
+
+    <div class="span2 control-group" style="margin-left:3.5%;">
+        @Html.Label("incrementSold", "Increment Sold", new { @class = "control-label", @style = "margin-left: 0%;" })
+        @Html.TextBox("incrementSold", "", new { @class = "span12", @readonly = "readonly", @Value = "0", @style = "width:108%; margin-left: 0%;" })
+    </div>
+
+    <div class="span2 control-group" style="margin-left:1.8%;">
+        @Html.Label("incrementTarget", "Increment Target(%)", new { @class = "control-label", @style = "margin-top: 0%;" })
+        @Html.TextBox("incrementTarget", "", new { @class = "span12", @style = "width:108%;", @readonly = "readonly", @type = "number", @Value = "0", @min = 0 })
+    </div>
+
+
+</div>
+
+<div class="row-fluid" style="margin-left:2%;width:96.5%">
+    <div class="span2 control-group">
+        @Html.Label("currentYearSold", "Current DateRange Sold", new { @class = "control-label" })
+        @Html.TextBox("currentYearSold", "", new { @class = "span12", @readonly = "readonly", @Value = "0", @style = "width:110.5%" })
+    </div>
+    <div class="span2 control-group">
+        @Html.Label("lastYearSold", "LastYear DateRange Sold", new { @class = "control-label" })
+        @Html.TextBox("lastYearSold", "", new { @class = "span12", @readonly = "readonly", @Value = "0", @style = "width:110.5%" })
+    </div>
+    <div class="span2 control-group">
+        @Html.Label("averageTargerSellingQty", "Average Targer Selling Qty", new { @class = "control-label" })
+        @Html.TextBox("averageTargerSellingQty", "", new { @class = "span12", @readonly = "readonly", @Value = "0", @style = "width:112%" })
+    </div>
+    <div class="span2 control-group">
+        @Html.Label("avgCurrentSoldOrDays", "Avg Current Sold/Days", new { @class = "control-label", @style = "margin-top: 0%;" })
+        @Html.TextBox("avgCurrentSoldOrDays", "", new { @class = "span12", @style = "width:106%;", @Value = "0", @readonly = "readonly" })
+    </div>
+    <div class="span2 control-group" style="margin-left:2%;">
+        @Html.Label("actualTargetQty", "Actual Target Qty", new { @class = "control-label", @style = "margin-top: 0%;" })
+        @Html.TextBox("actualTargetQty", "", new { @class = "span12", @style = "width:108%; margin-left: 0%;", @Value = "0", @readonly = "readonly" })
+    </div>
+    <div class="span2 control-group" style="margin-left:1.8%;">
+        @Html.Label("currentStockSurvivalDays", "Current Stock Survival Days", new { @class = "control-label", @style = "margin-left: 0%;" })
+        @Html.TextBox("currentStockSurvivalDays", "", new { @class = "span12", @readonly = "readonly", @Value = "0", @style = "width:108%; margin-left: 0%;" })
+    </div>
+</div>
+
+<div class="row-fluid" style="margin-left:2%;width:96.5%">
+    <div class="span2 control-group">
+        @Html.Label("shippingDays", "Man/Suppliers/Shipping Days", new { @class = "control-label" })
+        @Html.TextBox("shippingDays", "", new { @class = "span12", @style = "width:110.5%", @type = "number", @Value = "0", @min = 0 })
+    </div>
+    <div class="span2 control-group">
+        @Html.Label("depositPeriod", "Deposit Period", new { @class = "control-label" })
+        @Html.TextBox("depositPeriod", "", new { @class = "span12", @style = "width:110.5%", @type = "number", @Value = "0", @min = 0 })
+    </div>
+    <div class="span1 control-group">
+        @Html.Label("extendPeriod", "Extend Period", new { @class = "control-label" })
+        @Html.TextBox("extendPeriod", "", new { @class = "span12", @type = "number", @Value = "0", @min = 0, @style = "width:200%" })
+    </div>
+    <div class="span1 control-group">
+        <button style="margin-left: 65%; width: 60%; margin-top: 23%; font-weight: bold;" class="btn" id="LoadRecordsButton" onclick="FindForecastingItem2()" type="button">Next</button>
+    </div>
+    <div class="span3 control-group">
+    </div>
+</div>
+
+<div class="row-fluid" style="margin-left:2%;width:96.5%">
+    <div class="span2 control-group">
+        @Html.Label("orderReceivingDaysBeforeSelling", "Order Receiving Days Before Selling", new { @class = "control-label", })
+        @Html.TextBox("orderReceivingDaysBeforeSelling", "", new { @class = "span12", @style = "width:110.5%", @Value = "0", @readonly = "readonly" })
+    </div>
+    <div class="span2 control-group">
+        @Html.Label("extraStock", "Without Stock / Extra Stock", new { @class = "control-label", @style = "margin-top: 0%;" })
+        @Html.TextBox("extraStock", "", new { @class = "span12", @style = "width:110.5%", @Value = "0", @readonly = "readonly" })
+    </div>
+    <div class="span2 control-group">
+        @Html.Label("actualForecastingDays", "Actual Forecasting Days", new { @class = "control-label", @style = "margin-top: 0%;" })
+        @Html.TextBox("actualForecastingDays", "", new { @class = "span12", @readonly = "readonly", @Value = "0", @style = "width:108%" })
+    </div>
+
+    <div class="span2 control-group">
+        @Html.Label("totalQtyNeedToOrder", "Total Qty Need to Order", new { @class = "control-label", @style = "margin-top: 0%;" })
+        @Html.TextBox("totalQtyNeedToOrder", "", new { @class = "span12", @style = "width:106%", @Value = "0", @readonly = "readonly" })
+    </div>
+    <div class="span2 control-group">
+        @Html.Label("OrderStatus", "Status of QTY", new { @class = "control-label", @style = "margin-left: -4%;" })
+        @Html.TextBox("OrderStatus", "", new { @class = "span12", @readonly = "readonly", @style = "width:106%; margin-left: -4%;" })
+    </div>
+</div>
+
+<div class="row-fluid" style="margin-left:2%;width:96.5%">
+    <div class="span2 control-group" >
+        @Html.Label("lessPeriod", "Period of Extra/Less (Days)", new { @class = "control-label", @style = "margin-left: 0%;" })
+        @Html.TextBox("lessPeriod", "", new { @class = "span12", @style = "width:110%; margin-left: 0%;", @readonly = "readonly", @Value = "0" })
+    </div>
+    <div class="span2 control-group">
+        @Html.Label("stockDaysStatus", "Status of Period", new { @class = "control-label" })
+        @Html.TextBox("stockDaysStatus", "", new { @class = "span12", @readonly = "readonly", @style = "width:110%" })
+    </div>
+    <div class="span2 control-group">
+        @Html.Label("totalForecastingDays", "Total Forecasting Days", new { @class = "control-label" })
+        @Html.TextBox("totalForecastingDays", "", new { @class = "span12", @readonly = "readonly", @Value = "0", @style = "width:108%" })
+    </div>
+    <div class="span2 control-group">
+        @Html.Label("totalQtyNeed", "Final Total Qty Need to Order", new { @class = "control-label", @style = "margin-top: 0%;" })
+        @Html.TextBox("totalQtyNeed", "", new { @class = "span12", @Value = "0", @readonly = "readonly", @style = "width:106%" })
+    </div>
+    <div class="span1 control-group">
+        <button style="margin-left: -9%; width: 60%; margin-top: 23%; font-weight: bold;" class="btn" id="LoadRecordsButton" onclick="FindForecastingItemListData()" type="button">Next</button>
+    </div>
+    <div class="span1 control-group" style="margin-left: 0%;">
+        @Html.Label("orderId", "Order Id", new { @class = "control-label", @style = "margin-top: 0%;" })
+        @Html.TextBox("orderId", "", new { @class = "span12", @Value = @ViewBag.OrderId, @readonly = "readonly", @style = "width:150%" })
+    </div>
+</div>
+
+<div id="gridItemForecasting" style="width:96.5%;margin-left:2%;"></div>
+
+<div class="row-fluid" style="margin-left:2%;width:96.5%">
+    <div class="span1 control-group">
+        <button style="margin-left: 2%; width: 210%; margin-top: 23%; font-weight: bold;" class="btn" id="LoadProceedData" onclick="ProceedData()" type="button">Proceed</button>
+    </div>
+</div>
+
+<hr />
+
+<div class="row-fluid" style="margin-left:2%;width:96.5%">
+    <div class="span2 control-group">
+        @Html.Label("forecastingQty", "Forecasting Qty", new { @class = "control-label", })
+        @Html.TextBox("forecastingQty", "", new { @class = "span12", @style = "width:110.5%", @Value = "0", @readonly = "readonly" })
+    </div>
+    <div class="span2 control-group">
+        @Html.Label("totalSoldQty", "Total Sold Qty", new { @class = "control-label", @style = "margin-top: 0%;" })
+        @Html.TextBox("totalSoldQty", "", new { @class = "span12", @readonly = "readonly", @Value = "0", @style = "width:108%" })
+    </div>
+    <div class="span2 control-group">
+        @Html.Label("supplierOrManufactureName", "Supplier / Manufacture Name", new { @class = "control-label", @style = "margin-top: 0%;" })
+        @Html.TextBox("supplierOrManufactureName", "", new { @class = "span12", @style = "width:110.5%" })
+    </div>
+    <div class="span3 control-group">
+        @Html.Label("batchNo", "Batch No", new { @class = "control-label", @style = "margin-top: 0%;" })
+        @Html.TextBox("batchNo", "", new { @class = "span12", @style = "width:108%" })
+    </div>
+    <div class="span3 control-group">
+        <label class="control-label">Date</label>
+        @Html.TextBox("txtDate", DateTime.Now.ToShortDateString(), new
+        {
+            @class = "span12 datepicker",
+            @readonly = "readonly",
+            @style = "cursor:pointer; background-color:white",
+            @placeholder = "From Date"
+        })
+    </div>
+</div>
+
+<div class="row-fluid" style="margin-left:2%;width:96.5%">
+    <div class="span2 control-group">
+        @Html.Label("totalCBM", "Total CBM", new { @class = "control-label", })
+        @Html.TextBox("totalCBM", "", new { @class = "span12", @style = "width:110.5%", @Value = "0", @readonly = "readonly" })
+    </div>
+    <div class="span2 control-group">
+        @Html.Label("supplierCurrency", "Supp Currency", new { @class = "control-label", @style = "margin-top: 0%;" })
+        @Html.TextBox("supplierCurrency", "", new { @class = "span12", @style = "width:108%" })
+    </div>
+    <div class="span2 control-group">
+        @Html.Label("supplierCost", "Supp Cost", new { @class = "control-label", @style = "margin-top: 0%;" })
+        @Html.TextBox("supplierCost", "", new { @class = "span12", @style = "width:110.5%", @Value = "0", @min = 0 })
+    </div>
+    <div class="span3 control-group">
+        @Html.Label("totalQty", "Final Order Total Qty", new { @class = "control-label", @style = "margin-top: 0%;" })
+        @Html.TextBox("totalQty", "", new { @class = "span12", @style = "width:108%", @readonly = "readonly", @Value = "0" })
+    </div>
+    <div class="span3 control-group">
+        @Html.Label("totalValue", "Total Value", new { @class = "control-label", @style = "margin-top: 0%;" })
+        @Html.TextBox("totalValue", "", new { @class = "span12", @readonly = "readonly", @Value = "0" })
+    </div>
+</div>
+
+<div class="row-fluid" style="margin-left:2%;width:96.5%">
+    <div class="span2 control-group">
+        @Html.Label("totalBox", "Total Box", new { @class = "control-label", })
+        @Html.TextBox("totalBox", "", new { @class = "span12", @style = "width:110.5%", @readonly = "readonly", @Value = "0" })
+    </div>
+    <div class="span2 control-group">
+        @Html.Label("portOfLoading", "Port of Loading", new { @class = "control-label", })
+        @Html.TextBox("portOfLoading", "", new { @class = "span12", @style = "width:110.5%" })
+    </div>
+    <div class="span2 control-group">
+        @Html.Label("leadTime", "Shipping Days/Lead Time", new { @class = "control-label", @style = "margin-top: 0%;" })
+        @Html.TextBox("leadTime", "", new { @class = "span12", @style = "width:110.5%", @readonly = "readonly", @Value = "0" })
+    </div>
+    <div class="span3 control-group">
+        @Html.Label("comments", "Comments", new { @class = "control-label", @style = "margin-top: 0%;" })
+        @Html.TextBox("comments", "", new { @class = "span12", @style = "width:104.5%" })
+    </div>
+    <div class="span2 control-group">
+        <button style="margin-left: 0.5%; width: 158.5%; margin-top: 9.2%; font-weight: bold;" class="btn" id="LoadProceedData" onclick="SaveData()" type="button">Save</button>
+    </div>
+</div>
+
+
+<script>
+    $(document).ready(pageLoad);
+
+    function pageLoad() {
+        $(".datepicker").datepicker();
+        $(".datepicker").datepicker("option", "dateFormat", "d M, y");
+    }
+
+    const months = [
+        'Jan',
+        'Feb',
+        'Mar',
+        'Apr',
+        'May',
+        'Jun',
+        'Jul',
+        'Aug',
+        'Sep',
+        'Oct',
+        'Nov',
+        'Dec'
+    ]
+
+    $("#txtCurrentStartDate").change(function () {
+        var startDate = $("#txtCurrentStartDate").val()
+        var startDateToDate = new Date(startDate);
+
+        var year = startDateToDate.getFullYear();
+        const monthName = months[startDateToDate.getMonth()];
+        var day = startDateToDate.getDate();
+
+        const formattedDate = `${day} ${monthName}, ${year-1}`
+        $("#txtLastYearStartDate").val(formattedDate);
+    });
+
+    $("#txtCurrentEndDate").change(function () {
+        var endDate = $("#txtCurrentEndDate").val()
+        var endDateToDate = new Date(endDate);
+
+        var year = endDateToDate.getFullYear();
+        const monthName = months[endDateToDate.getMonth()];
+        var day = endDateToDate.getDate();
+
+        const formattedDate = `${day} ${monthName}, ${year - 1}`
+        $("#txtLastYearEndDate").val(formattedDate);
+    });
+
+    $('#ItemMasterID').on('change', function () {
+        var fbaRootId = $('#FBARootID').val();
+        var itemMasterId = $('#ItemMasterID').val();
+
+        $.ajax({
+            url: "/Forecasting/GetsItemStock",
+            data: "fbaRootId=" + fbaRootId + "&itemMasterId=" + itemMasterId,
+            type: 'POST',
+            success: onSuccessItemStock
+        });
+    });
+
+    $('#FBARootID').on('change', function () {
+        var fbaRootId = $('#FBARootID').val();
+        var itemMasterId = $('#ItemMasterID').val();
+
+        $.ajax({
+            url: "/Forecasting/GetsItemStock",
+            data: "fbaRootId=" + fbaRootId + "&itemMasterId=" + itemMasterId,
+            type: 'POST',
+            success: onSuccessItemStock
+        });
+    });
+
+    function onSuccessItemStock(result) {
+        $('#warehouseStock').val(result.WhStock)
+        $('#fbaStock').val(result.FBAStock)
+        $('#totalStock').val(result.TotalStock)
+
+        $('#fbaStock').removeAttr('readonly');
+        $('#warehouseStock').removeAttr('readonly');
+
+        //$('#fbaStock').removeClass("toedit").prop("readonly", false).addClass("inlineditjoind");
+        //$('#warehouseStock').removeClass("toedit").prop("readonly", false).addClass("inlineditjoind");
+    }
+
+    function FindForecastingItem() {
+        var fbaRootId = $('#FBARootID').val();
+        var itemMasterId = $('#ItemMasterID').val();
+        var incrementTarget = $('#incrementTarget').val();
+        var averageDurationDays = $('#averageDurationDays').val();
+
+        const currentStartDate = `${new Date($('#txtCurrentStartDate').val()).getDate()} ${months[new Date($('#txtCurrentStartDate').val()).getMonth()]}, ${new Date($('#txtCurrentStartDate').val()).getFullYear()}`;
+        const currentEndDate = `${new Date($('#txtCurrentEndDate').val()).getDate()} ${months[new Date($('#txtCurrentEndDate').val()).getMonth()]}, ${new Date($('#txtCurrentEndDate').val()).getFullYear()}`;
+
+        const lastYearStartDate = `${new Date($('#txtLastYearStartDate').val()).getDate()} ${months[new Date($('#txtLastYearStartDate').val()).getMonth()]}, ${new Date($('#txtLastYearStartDate').val()).getFullYear()}`;
+        const lastYearEndDate = `${new Date($('#txtLastYearEndDate').val()).getDate()} ${months[new Date($('#txtLastYearEndDate').val()).getMonth()]}, ${new Date($('#txtLastYearEndDate').val()).getFullYear()}`;
+
+        if (currentStartDate == currentEndDate) {
+            alert("Current StartDate & EndDate are same!!")
+        }
+        else {
+            $.ajax({
+                url: "/Forecasting/GetsItemForecastingInfo",
+                data: "fbaRootId=" + fbaRootId + "&itemMasterId=" + itemMasterId + "&currentStartDate=" + currentStartDate + "&currentEndDate=" + currentEndDate + "&lastYearStartDate=" + lastYearStartDate + "&lastYearEndDate=" + lastYearEndDate + "&incrementTarget=" + incrementTarget + "&averageDurationDays=" + averageDurationDays,
+                type: 'POST',
+                success: onSuccessItemForecastingData
+            });
+
+            $('#incrementSold').removeClass("toedit").prop("readonly", false).addClass("inlineditjoind");
+            $('#warehouseStock').attr('readonly', 'readonly');
+            $('#fbaStock').attr('readonly', 'readonly');
+        }
+    }
+
+    function onSuccessItemForecastingData(result) {
+        $('#currentYearSold').val(result.CurrentYearSold);
+        $('#lastYearSold').val(result.LastYearSold);
+        $('#averageTargerSellingQty').val(result.TargetSellingAvg);
+        $('#actualTargetQty').val(result.ActualTargetQty);
+        if ($('#averageDurationDays').val() != 0) {
+            $('#avgCurrentSoldOrDays').val(parseFloat(result.TargetSellingAvg / $('#averageDurationDays').val()).toFixed(2));
+        }
+        $('#incrementSold').val(result.IncrementSold);
+        $('#currentStockSurvivalDays').val(result.CurrentStockSurvivalDays);
+    }
+
+    $("#incrementSold").on("keyup", function (event) {
+        var incrementSold = $('#incrementSold').val();
+        var avgCurrentSoldOrDays = $('#avgCurrentSoldOrDays').val();
+        var averageTargerSellingQty = $('#averageTargerSellingQty').val();
+        var averageDurationDays = $('#averageDurationDays').val();
+        var totalStock = $('#totalStock').val();
+
+        if (incrementSold == "" && incrementSold == 0) {
+            $('#incrementTarget').val(0);
+            $('#actualTargetQty').val(0);
+            $('#currentStockSurvivalDays').val(0);
+        }
+        else if (incrementSold == 0) {
+            var incrementTarget = parseFloat(((incrementSold - avgCurrentSoldOrDays) / avgCurrentSoldOrDays) * 100).toFixed(2);
+
+            $('#incrementTarget').val(incrementTarget);
+            $('#actualTargetQty').val(0);
+            $('#currentStockSurvivalDays').val(0);
+        }
+        else
+        {
+            var incrementTarget = parseFloat(((incrementSold - avgCurrentSoldOrDays) / avgCurrentSoldOrDays) * 100).toFixed(2);
+            var actualTargetQty = parseFloat(parseFloat(averageTargerSellingQty) + ((parseFloat(incrementSold) - parseFloat(avgCurrentSoldOrDays)) * parseFloat(averageDurationDays))).toFixed(2);
+            var currentStockSurvivalDays = parseFloat(totalStock / incrementSold).toFixed(2);
+
+            $('#incrementTarget').val(incrementTarget);
+            $('#actualTargetQty').val(actualTargetQty);
+            $('#currentStockSurvivalDays').val(currentStockSurvivalDays);
+        }
+    });
+
+    function FindForecastingItem2() {
+        var depositPeriod = $('#depositPeriod').val();
+        var shippingDays = $('#shippingDays').val();
+        var currentStockSurvivalDays = $('#currentStockSurvivalDays').val();
+        var averageDurationDays = $('#averageDurationDays').val();
+        var incrementSold = $('#incrementSold').val();
+        var extendPeriod = $('#extendPeriod').val();
+
+        $.ajax({
+            url: "/Forecasting/GetsItemForecastingInfo2",
+            data: "depositPeriod=" + depositPeriod + "&shippingDays=" + shippingDays + "&currentStockSurvivalDays=" + currentStockSurvivalDays + "&averageDurationDays=" + averageDurationDays + "&incrementSold=" + incrementSold + "&extendPeriod=" + extendPeriod,
+            type: 'POST',
+            success: onSuccessItemForecastingData2
+        });
+
+        //FindForecastingItemListData();
+    }
+
+    function onSuccessItemForecastingData2(result) {
+        $('#extraStock').val(result.ExtraStock);
+        $('#orderReceivingDaysBeforeSelling').val(result.OrderReceivingDaysBeforeSelling);
+        $('#actualForecastingDays').val(result.ActualForecastingDays);
+        $('#totalQtyNeedToOrder').val(parseFloat(result.TotalQtyNeedToOrder).toFixed(2));
+        $('#OrderStatus').val(result.OrderStatus);
+        $('#stockDaysStatus').val(result.StockDaysStatus);
+        $('#lessPeriod').val(result.LessPeriod);
+        $('#totalForecastingDays').val(result.TotalForecastingDays);
+        $('#totalQtyNeed').val(parseFloat(result.TotalQtyNeed).toFixed(2));
+    }
+
+    function FindForecastingItemListData() {
+
+        $('#gridItemForecasting').data('kendoGrid').dataSource.read();
+
+        var itemMasterId = $('#ItemMasterID').val();
+        var currentYearSold = $('#currentYearSold').val();
+        var warehouseStockId = $('#FBARootID').val();
+        var totalQtyNeedToOrder = $('#totalQtyNeed').val();
+
+        const currentStartDate = `${new Date($('#txtCurrentStartDate').val()).getDate()} ${months[new Date($('#txtCurrentStartDate').val()).getMonth()]}, ${new Date($('#txtCurrentStartDate').val()).getFullYear()}`;
+        const currentEndDate = `${new Date($('#txtCurrentEndDate').val()).getDate()} ${months[new Date($('#txtCurrentEndDate').val()).getMonth()]}, ${new Date($('#txtCurrentEndDate').val()).getFullYear()}`;
+
+        var url = "@Url.Action("GetsItemForecastingListData", "Forecasting")?itemMasterId=" + itemMasterId + "&currentYearSold=" + currentYearSold + "&currentStartDate=" + currentStartDate + "&currentEndDate=" + currentEndDate + "&warehouseStockId=" + warehouseStockId + "&totalQtyNeedToOrder=" + totalQtyNeedToOrder;
+
+        $.ajax({
+            type: "GET",
+            url: url,
+            contentType: false,
+            processData: false,
+            success: function (response) {
+                if (response.output == 'success') {
+                    var gridDataSource = response.returnvalue;
+
+                    var grid = $("#gridItemForecasting").data("kendoGrid");
+                    var dataS = grid.dataSource;
+                    var total = 0;
+                    $.each(gridDataSource, function (idx, row) {
+                        dataS.insert(total, row);
+                    });
+                }
+            }
+        });
+    }
+
+    function ProceedData() {
+        var totalQtyNeed = $('#totalQtyNeed').val();
+        var currentYearSold = $('#currentYearSold').val();
+        var leadTime = $('#shippingDays').val();
+        var supplierCost = $('#supplierCost').val();
+        
+        var gridItemForecasting = $("#gridItemForecasting").data("kendoGrid").dataSource.data();
+        var total = parseFloat(0.0);
+        var finalOrder = parseFloat(0.0);
+        var totalBox = parseFloat(0.0);
+
+        for (var x = 0; x < gridItemForecasting.length; x++)
+        {
+            total = total + gridItemForecasting[x].Total;
+            finalOrder = finalOrder + gridItemForecasting[x].FinalOrder;
+            totalBox = totalBox + gridItemForecasting[x].TotalCarton;
+        }
+
+        $('#forecastingQty').val(parseFloat(totalQtyNeed).toFixed(2));
+        $('#totalSoldQty').val(currentYearSold);
+        $('#totalCBM').val(parseFloat(total).toFixed(2));
+        $('#totalQty').val(finalOrder);
+        $('#totalBox').val(parseFloat(totalBox).toFixed(2));
+        $('#leadTime').val(leadTime);
+
+        var totalValue = parseFloat(supplierCost) * parseFloat(finalOrder);
+        $('#totalValue').val(parseFloat(totalValue).toFixed(2));
+    }
+
+    $("#supplierCost").keyup(function () {
+        if ($('#supplierCost').val() >= 0) {
+
+            var supplierCost = parseFloat($('#supplierCost').val());
+            var finalOrder = parseFloat($('#totalQty').val());
+            var totalValue = parseFloat(supplierCost) * parseFloat(finalOrder);
+
+            $('#totalValue').val(parseFloat(totalValue).toFixed(2));
+        }
+    });
+
+    $("#warehouseStock").keyup(function () {
+        if ($('#warehouseStock').val() >= 0) {
+            var warehouseStock = parseFloat($('#warehouseStock').val());
+            var fbaStock = parseFloat($('#fbaStock').val());
+            var totalStock = parseFloat(warehouseStock) + parseFloat(fbaStock);
+
+            $('#totalStock').val(parseFloat(totalStock).toFixed(0));
+        }
+    });
+
+    $("#fbaStock").keyup(function () {
+        if ($('#fbaStock').val() >= 0) {
+            var warehouseStock = parseFloat($('#warehouseStock').val());
+            var fbaStock = parseFloat($('#fbaStock').val());
+            var totalStock = parseFloat(warehouseStock) + parseFloat(fbaStock);
+
+            $('#totalStock').val(parseFloat(totalStock).toFixed(0));
+        }
+    });
+
+    function SaveData() {
+
+        const orderDate = `${new Date($('#txtDate').val()).getDate()} ${months[new Date($('#txtDate').val()).getMonth()]}, ${new Date($('#txtDate').val()).getFullYear()}`;
+        var forecastingItemList = [];
+
+        var forecastingItemSummary = {
+            OrderId: $('#orderId').val(),
+            ItemMasterId: $('#ItemMasterID').val(),
+            SupplierName: $('#supplierOrManufactureName').val(),
+            ForecastingQty: $('#forecastingQty').val(),
+            TotalSoldQty: $('#totalSoldQty').val(),
+            BatchNo: $('#batchNo').val(),
+            OrderDate: orderDate,
+            TotalCVM: $('#totalCBM').val(),
+            SupplierCurrency: $('#supplierCurrency').val(),
+            SupplierCost: $('#supplierCost').val(),
+            TotalQty: $('#totalQty').val(),
+            TotalValue: $('#totalValue').val(),
+            TotalBox: $('#totalBox').val(),
+            PortOfLoading: $('#portOfLoading').val(),
+            LeadTime: $('#leadTime').val(),
+            Comments: $('#comments').val(),
+            SCMNameId: $('#UserID').val(),
+            WarehouseRootId: $('#FBARootID').val(),
+            SCMName: $("#UserID option:selected").text(),
+            WarehouseRoot: $("#FBARootID option:selected").text(),
+            CreatedBy: $('#userName').val(),
+            CreatedDate: new Date()
+        };
+
+        var forecastinGrid = $("#gridItemForecasting").data("kendoGrid").dataSource.data();
+
+        for (var i = 0; i < forecastinGrid.length; i++) {
+
+            var forecastinGridDetails = {
+                OrderId: $('#orderId').val(),
+                ItemMasterID: $('#ItemMasterID').val(),
+                SellerID: forecastinGrid[i].SellerID,
+                SKU: forecastinGrid[i].SKU,
+                FNSKU: forecastinGrid[i].FNSKU,
+                QuantitySold: forecastinGrid[i].QuantitySold,
+                TotalSold: forecastinGrid[i].TotalSold,
+                AvgSoldPercentage: forecastinGrid[i].AvgSoldPercentage,
+                AvgSold: forecastinGrid[i].AvgSold,
+                TotalQtyNeeded: forecastinGrid[i].TotalQtyNeeded,
+                OrderByFNSKU: forecastinGrid[i].OrderByFNSKU,
+                FinalOrder: forecastinGrid[i].FinalOrder,
+                QtyPerCarton: forecastinGrid[i].QtyPerCarton,
+                TotalCarton: forecastinGrid[i].TotalCarton,
+                BoxDim: forecastinGrid[i].BoxDim,
+                CBM3: forecastinGrid[i].CBM3,
+                Total: forecastinGrid[i].Total,
+                IsActive: true,
+                CreatedBy: $('#userName').val(),
+                CreatedDate: new Date()
+            };
+            forecastingItemList.push(forecastinGridDetails);
+        }
+
+        var forecastingModel = {
+            ForecastingItemSummary: forecastingItemSummary,
+            ForecastingItems: forecastingItemList
+        };
+
+        var forecastingDataModel = JSON.stringify(forecastingModel);
+
+        var data = new FormData();
+
+        data.append("ForecastingDataModel", forecastingDataModel);
+
+        var actionurl = "@Url.Action("SaveItemForecasting", "Forecasting")";
+
+        Loading(true);
+
+        $.ajax({
+            type: "POST",
+            url: actionurl,
+            data: data,
+            processData: false,
+            contentType: false,
+            async: false,
+            success: function (data) {
+                Loading(false);
+                if (data.output === "success") {
+                    alert("Data saved successfully!!");
+                    //swal("Success", "Data Saved Successfully!!", "success");
+                    //swal("Data Saved Successfully!!");
+                    window.location.href = '/Forecasting/ItemForecastingList';
+                    return false;
+                } else {
+                    alert("Something went wrong!!");
+                    return false;
+                }
+            }
+        });
+    }
+
+    $("#gridItemForecasting").kendoGrid({
+        dataSource: {
+            schema: {
+                model: {
+                    fields: {
+                        ItemMasterID: { type: "string", hidden: true },
+                        //SelectFNSKU: { type: "boolean", editable: true },
+                        SellerID: { type: "string", editable: false},
+                        SKU: { type: "string", editable: false},
+                        FNSKU: { type: "string", editable: false},
+                        QuantitySold: { type: "number", editable: false},
+                        TotalSold: { type: "number", editable: false},
+                        AvgSoldPercentage: { type: "number", editable: false},
+                        AvgSold: { type: "number", editable: false},
+                        TotalQtyNeeded: { type: "number", editable: false},
+                        OrderByFNSKU: { type: "number", editable: false },
+                        FinalOrder: { type: "number", editable: true },
+                        QtyPerCarton: { type: "number", editable: false},
+                        TotalCarton: { type: "number", editable: false},
+                        BoxDim: { type: "string", editable: false},
+                        CBM3: { type: "number", editable: false},
+                        Total: { type: "number", editable: false}
+                    }
+                }
+            },
+            aggregate: [
+                { field: 'QuantitySold', aggregate: 'sum' },
+                /*{ field: 'TotalSold', aggregate: 'sum' },*/
+                { field: 'AvgSold', aggregate: 'sum' },
+                { field: 'OrderByFNSKU', aggregate: 'sum' },
+                { field: 'FinalOrder', aggregate: 'sum' },
+                { field: 'TotalCarton', aggregate: 'sum' },
+                { field: 'Total', aggregate: 'sum'}
+            ],
+        },
+        height: 300,
+        scrollable: true,
+        editable: true,
+        resizable: true,
+        sortable: true,
+        selectable: true,
+        //filterable: true,
+        //pageable: true,
+
+        columns: [
+            {
+                field: "ItemMasterID",
+                title: "ItemMasterID",
+                hidden: true
+            },
+            //{
+            //    field: 'SelectFNSKU',
+            //    title: 'SelectFNSKU',
+            //    template: '<input type="checkbox" #= SelectFNSKU ? \'checked="checked"\' : "" # class="chkbx"/>',
+            //    type: "boolean",
+            //    editable: true
+            //},
+            {
+                field: "SellerID",
+                title: "Brand"
+            },
+            {
+                field: "SKU",
+                title: "SKU"
+            },
+            {
+                field: "FNSKU",
+                title: "FNSKU"
+            },
+            {
+                field: 'QuantitySold',
+                title: 'Qty Sold',
+                template: '<span style=\'float:right;\'>#=QuantitySold#</span>',
+                aggregates: 'sum',
+                footerTemplate: '<span id=\'footerPlaceholder\' style=\'float:right;font-weight: bold;\'>#=sum#</span>'
+            },
+            {
+                field: "TotalSold",
+                title: "Total Sold",
+                //template: '<span style=\'float:right;\'>#=TotalSold#</span>',
+                //aggregates: 'sum',
+                //footerTemplate: '<span id=\'footerPlaceholder\' style=\'float:right;font-weight: bold;\'>#=sum#</span>'
+            },
+            {
+                field: "AvgSoldPercentage",
+                title: "Avg %",
+                hidden: true
+            },
+            {
+                field: "AvgSold",
+                title: "Avg.FNSKU(%)",
+                template: '<span style=\'float:right;\'>#=AvgSold#</span>',
+                aggregates: 'sum',
+                footerTemplate: '<span id=\'footerPlaceholder\' style=\'float:right;font-weight: bold;\'>#=sum#</span>'
+            },
+            {
+                field: "TotalQtyNeeded",
+                title: "Target Qty"
+            },
+            {
+                field: "OrderByFNSKU",
+                title: "Order/FNSKU",
+                template: '<span style=\'float:right;\'>#=OrderByFNSKU#</span>',
+                aggregates: 'sum',
+                footerTemplate: '<span id=\'footerPlaceholder\' style=\'float:right;font-weight: bold;\'>#=sum#</span>'
+            },
+            {
+                field: "FinalOrder",
+                title: "Final Order",
+                template: '<span style=\'float:right;\'>#=FinalOrder#</span>',
+                aggregates: 'sum',
+                footerTemplate: '<span id=\'footerPlaceholder\' style=\'float:right;font-weight: bold;\'>#=sum#</span>'
+            },
+            {
+                field: "QtyPerCarton",
+                title: "Qty/Carton"
+            },
+            {
+                field: "TotalCarton",
+                title: "Total Carton",
+                template: '<span style=\'float:right;\'>#=TotalCarton#</span>',
+                aggregates: 'sum',
+                footerTemplate: '<span id=\'footerPlaceholder\' style=\'float:right;font-weight: bold;\'>#=sum#</span>'
+            },
+            {
+                field: "BoxDim",
+                title: "Carton Dim"
+            },
+            {
+                field: "CBM3",
+                title: "CBM/Carton"
+            },
+            {
+                field: "Total",
+                title: "Total CBM/FNSKU",
+                template: '<span style=\'float:right;\'>#=Total#</span>',
+                aggregates: 'sum',
+                footerTemplate: '<span id=\'footerPlaceholder\' style=\'float:right;font-weight: bold;\'>#=sum#</span>',
+                format: "{0:##,#}"
+            },
+            {
+                title: "Process",
+                template: "<button class='remove k-button'>Remove</button>",
+                width: "90px"
+            }
+        ],
+
+        edit: function (e) {
+            var input = e.container.find("input");
+            setTimeout(function () { input.select(); }, 25);
+
+            var columnIndex = this.cellIndex(e.container);
+        },
+
+        save: function (e) {
+            if (e.values.FinalOrder >= 0) {
+                var sumQuantitySold = parseFloat(+e.model.QuantitySold);
+                e.model.fields["QuantitySold"].editable = true;
+                e.model.set("QuantitySold", parseFloat(sumQuantitySold).toFixed(2));
+                e.model.fields["QuantitySold"].editable = false;
+
+                //var sumTotalSold = parseFloat(+e.model.TotalSold);
+                //e.model.fields["TotalSold"].editable = true;
+                //e.model.set("TotalSold", parseFloat(sumTotalSold).toFixed(2));
+                //e.model.fields["TotalSold"].editable = false;
+
+                var sumAvgSold = parseFloat(+e.model.AvgSold);
+                e.model.fields["AvgSold"].editable = true;
+                e.model.set("AvgSold", parseFloat(sumAvgSold).toFixed(2));
+                e.model.fields["AvgSold"].editable = false;
+
+                var sumOrderByFNSKU = parseFloat(+e.model.OrderByFNSKU);
+                e.model.fields["OrderByFNSKU"].editable = true;
+                e.model.set("OrderByFNSKU", parseFloat(sumOrderByFNSKU).toFixed(2));
+                e.model.fields["OrderByFNSKU"].editable = false;
+
+                var sumFinalOrder = parseFloat(+e.model.FinalOrder);
+                e.model.fields["FinalOrder"].editable = true;
+                e.model.set("FinalOrder", parseFloat(sumFinalOrder).toFixed(2));
+                //e.model.fields["FinalOrder"].editable = false;
+
+                var sumTotalCarton = parseFloat(+e.model.TotalCarton);
+                e.model.fields["TotalCarton"].editable = true;
+                e.model.set("TotalCarton", parseFloat(sumTotalCarton).toFixed(2));
+                e.model.fields["TotalCarton"].editable = false;
+
+                var sumTotal = parseFloat(+e.model.Total);
+                e.model.fields["Total"].editable = true;
+                e.model.set("Total", parseFloat(sumTotal).toFixed(2));
+                e.model.fields["Total"].editable = false;
+
+                var totalCarton = 0;
+                if (+e.model.QtyPerCarton != 0)
+                {
+                    totalCarton = parseFloat(e.values.FinalOrder) / parseFloat(+e.model.QtyPerCarton);
+                }
+
+                e.model.fields["TotalCarton"].editable = true;
+                e.model.set("TotalCarton", parseFloat(totalCarton).toFixed(2));
+                e.model.fields["TotalCarton"].editable = false;
+
+                var total = parseFloat(totalCarton * parseFloat(+e.model.CBM3)).toFixed(2);
+
+                e.model.fields["Total"].editable = true;
+                e.model.set("Total", parseFloat(total).toFixed(2));
+                e.model.fields["Total"].editable = false;
+
+                e.sender.refresh();
+            }
+        }
+    }).data("kendoGrid");
+
+    function weightEditor(container, options) {
+        $('<input name="' + options.field + '"/>')
+            .appendTo(container)
+            .kendoNumericTextBox({
+                decimals: 4,
+        })
+    };
+
+    $("#gridItemForecasting").on("click", "button.remove", function () {
+        var $tr = $(this).closest("tr"),
+            grid = $("#gridItemForecasting").data("kendoGrid");
+
+        grid.removeRow($tr);
+    });
+</script>

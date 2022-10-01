@@ -1,0 +1,171 @@
+﻿@{
+    ViewBag.Title = "ItemForecastingList";
+    Layout = "~/Views/shared/_LoggedInLayout.cshtml";
+}
+
+<div class="row-fluid">
+    <div class="span12 control-group">
+        <h2 style="text-align:center;color: green;">Item Forecasting List</h2>
+    </div>
+</div>
+
+<div id="dialog-confirm" title="Are you sure you want to delete?"></div>
+<div id="tblItemForecastingView"></div>
+
+<script>
+
+    $(document).ready(pageLoad);
+
+    function pageLoad() {
+        loadItemForecasting()
+    }
+
+    function loadItemForecasting() {
+        $('#tblItemForecastingView').jtable({
+            title: 'Item Forecasting List',
+            useBootstrap: true,
+            sorting: true,
+
+            actions: {
+                listAction: '@Url.Action("GetItemForecastingSummaryList")'
+            },
+            fields: {
+                Id: {
+                    key: true,
+                    list: false
+                },
+                ItemMasterId: {
+                    key: true,
+                    list: false
+                },
+                OrderId: {
+                    title: 'Order Id',
+                    width: '4%'
+                },
+                ItemName: {
+                    title: 'Item Name',
+                    width: '8%'
+                },
+                ItemCode: {
+                    title: 'Item Code',
+                    width: '5%'
+                },
+                SupplierName: {
+                    title: 'Supplier Name',
+                    width: '7%'
+                },
+                TotalQty: {
+                    title: 'Total Qty',
+                    width: '4%'
+                },
+                TotalBox: {
+                    title: 'Total Box',
+                    width: '4%'
+                },
+                SupplierCost: {
+                    title: 'Supplier Cost',
+                    width: '7%'
+                },
+                SupplierCurrency: {
+                    title: 'Supplier Currency',
+                    width: '7%'
+                },
+                TotalValue: {
+                    title: 'Total Value',
+                    width: '5%'
+                },
+                TotalCVM: {
+                    title: 'Total CBM',
+                    width: '4%'
+                },
+                OrderDateString: {
+                    title: 'Order Created Date',
+                    width: '8%'
+                },
+                PortOfLoading: {
+                    title: 'Port of Loading',
+                    width: '6%'
+                },
+                SCMName: {
+                    title: 'SCM Name',
+                    width: '5%'
+                },
+                WarehouseRoot: {
+                    title: 'Warehouse Root',
+                    width: '5%'
+                },
+                CreatedDateString: {
+                    title: 'Order Submitted Date',
+                    width: '9%'
+                },
+                LeadTime: {
+                    title: 'LeadTime',
+                    width: '5%'
+                },
+                Comments: {
+                    title: 'Comments',
+                    width: '5%'
+                },
+
+                Edit: {
+                    display: function (data) {
+                        return String.format("<a class='btn btn-success btn-mini' href='EditForecasting/{0}'>Edit</a>", data.record.Id);
+                    },
+                    width: '2%'
+                },
+                Remove: {
+                    display: function (data) {
+                        return String.format("<a class='btn btn-success btn-mini' onclick=\"RemoveForecastingItem({0})\">Remove</a>", data.record.Id);
+                    },
+                    width: '2%'
+                },
+            },
+            toolbar: {
+                items: [{
+                    icon: '../../Content/images/add_icon.png',
+                    text: 'Add ItemForecasting',
+                    click: addItem
+                }]
+            }
+        });
+        $('#tblItemForecastingView').jtable('load');
+    }
+
+    function RemoveForecastingItem(Id) {
+        $("#dialog-confirm").dialog({
+            resizable: true,
+            height: 140,
+            modal: true,
+            buttons: {
+                "Yes": function () {
+
+                    $.ajax({
+                        url: '@Url.Action("RemoveItemForecasting/")' + Id,
+                        type: 'POST',
+                        success: function (result) {
+                            if (result.Result=="OK")
+                            {
+                                alert('Data remove successfully!!');
+                                $('#tblItemForecastingView').jtable('load');
+                            }
+                            else
+                            {
+                                alert('You did not delete!!');
+                                $('#tblItemForecastingView').jtable('load');
+                            }
+                        }
+                    });
+                    $(this).dialog("close");
+                },
+                "No": function () {
+                    $(this).dialog("close");
+                }
+            }
+        });
+    }
+
+    function addItem() {
+        $(location).attr("href","@Url.Action("ItemForecasting")")
+    }
+
+</script>

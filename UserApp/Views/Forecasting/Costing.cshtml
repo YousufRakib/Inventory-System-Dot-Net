@@ -1,0 +1,169 @@
+﻿@{ 
+    ViewBag.Title = "Costing";
+    Layout = "~/Views/shared/_LoggedInLayout.cshtml"; 
+}
+
+<div class="row-fluid">
+    <div class="span12 control-group">
+        <h2 style="text-align:center;color: green;">Costing</h2>
+    </div>
+</div>
+
+<div id="dialog-confirm" title="Are you sure you want to delete?"></div>
+<div id="tblCostingListView"></div>
+
+<script>
+
+    $(document).ready(pageLoad);
+
+    function pageLoad() {
+        loadCostingList()
+    }
+
+    function loadCostingList() {
+        $('#tblCostingListView').jtable({
+            title: 'Costing List',
+            useBootstrap: true,
+            sorting: true,
+
+            actions: {
+                listAction: '@Url.Action("GetCreateShipment")'
+            },
+            fields: {
+                Id: {
+                    key: true,
+                    list: false
+                },
+                ShipmentOrderId: {
+                    title: 'SupplierOrder Id',
+                    width: '4%'
+                },
+                ShipmentId: {
+                    title: 'Shipment Id',
+                    width: '4%'
+                },
+                WarehouseRoot: {
+                    title: 'Warehouse Root',
+                    width: '5%'
+                },
+                ShipmentTitle: {
+                    title: 'Shipment Title',
+                    width: '5%'
+                },
+                PortOfLoading: {
+                    title: 'Port Of Loading',
+                    width: '5%'
+                },
+                PortOfArrival: {
+                    title: 'Port Of Arring',
+                    width: '5%'
+                },
+                Currency: {
+                    title: 'Currency',
+                    width: '3%'
+                },
+                TotalValue: {
+                    title: 'Total Value Goods',
+                    width: '5%'
+                },
+                PaidDeposit: {
+                    title: 'Paid Deposit',
+                    width: '4%'
+                },
+                RemainingBalance: {
+                    title: 'Remaining Balance',
+                    width: '4%'
+                },
+                ContainerSize: {
+                    title: 'Container Size',
+                    width: '5%'
+                },
+                TotalCVM: {
+                    title: 'Volume',
+                    width: '3%'
+                },
+                ETDDateString: {
+                    title: 'Final ETA',
+                    width: '4%'
+                },
+                CaseWorker: {
+                    title: 'Case Worker',
+                    width: '4%'
+                },
+                BookingAgent: {
+                    title: 'Booking Agent',
+                    width: '4%'
+                },
+                ClearingAgent: {
+                    title: 'Clearing Agent',
+                    width: '4%'
+                },
+
+                History: {
+                    display: function (data) {
+                        return String.format("<a class='btn btn-success btn-mini' href='ViewSupplierOrder/{0}'>Details</a>", data.record.Id);
+                    },
+                    width: '2%'
+                },
+                Edit: {
+                    display: function (data) {
+                        return String.format("<a class='btn btn-success btn-mini' href='ViewSupplierOrder/{0}'>Edit</a>", data.record.Id);
+                    },
+                    width: '2%'
+                },
+                Remove: {
+                    display: function (data) {
+                        return String.format("<a class='btn btn-success btn-mini' onclick=\"RemoveCosting({0})\">Remove</a>", data.record.Id);
+                    },
+                    width: '2%'
+                },
+            }
+            //toolbar: {
+            //    items: [{
+            //        icon: '../../Content/images/add_icon.png',
+            //        text: 'Create Shipment',
+            //        click: createShipment
+            //    }]
+            //}
+        });
+        $('#tblCostingListView').jtable('load');
+    }
+
+    function RemoveCosting(Id) {
+        $("#dialog-confirm").dialog({
+            resizable: true,
+            height: 140,
+            modal: true,
+            buttons: {
+                "Yes": function () {
+
+                    $.ajax({
+                        url: '@Url.Action("RemoveSupplierOrder/")' + Id,
+                        type: 'POST',
+                        success: function (result) {
+                            if (result.Result=="OK")
+                            {
+                                alert('Data remove successfully!!');
+                                $('#tblCostingListView').jtable('load');
+                            }
+                            else
+                            {
+                                alert('You did not delete!!');
+                                $('#tblCostingListView').jtable('load');
+                            }
+                        }
+                    });
+                    $(this).dialog("close");
+                },
+                "No": function () {
+                    $(this).dialog("close");
+                }
+            }
+        });
+    }
+
+    @*function createShipment() {
+        $(location).attr("href","@Url.Action("CreateShipment")")
+    }*@
+
+</script>
